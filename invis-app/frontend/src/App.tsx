@@ -1,11 +1,19 @@
-import './App.css'
+import {BrowserRouter, Routes, Route, Navigate} from "react-router";
+import LoginPage from "./pages/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import HomePage from "./pages/HomePage.tsx";
 
-function App() {
-  return (
-    <>
-      <p className='text-3xl text-amber-500'>Hello world!</p>
-    </>
-  )
+export default function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route index element={<Navigate to={'/home'} />}/>
+                <Route path={'/home'} element={<HomePage/>}/>
+                <Route path={'/register'} element={<RegisterPage/>}/>
+                <Route path={'/login'} element={<LoginPage/>}/>
+
+                <Route path={'*'} element={<Navigate to={'/home'} />}/>
+            </Routes>
+        </BrowserRouter>
+)
 }
-
-export default App
