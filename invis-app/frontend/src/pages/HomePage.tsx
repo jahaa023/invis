@@ -35,7 +35,7 @@ export default function HomePage() {
                 <h1 className="text-3xl pb-7">What we can offer:</h1>
                 <div className="p-6 mb-15 border-white border-solid border-2 rounded-3xl max-w-[80%] flex flex-col items-center gap-6">
                     <div className="flex items-center gap-3 max-w-[80%]">
-                        <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 bg-brand flex justify-center items-center">
+                        <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 max-w-16 max-h-16 bg-brand flex justify-center items-center">
                             <img className="w-[80%] h-[80%}" src={shield}/>
                         </div>
                         <div>
@@ -47,7 +47,7 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3 max-w-[80%]">
-                        <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 bg-brand flex justify-center items-center">
+                        <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 max-w-16 max-h-16 bg-brand flex justify-center items-center">
                             <img className="w-[80%] h-[80%}" src={globe}/>
                         </div>
                         <div>
@@ -59,7 +59,7 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3 max-w-[80%]">
-                        <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 bg-brand flex justify-center items-center">
+                        <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 max-w-16 max-h-16 bg-brand flex justify-center items-center">
                             <img className="w-[80%] h-[80%}" src={dollar}/>
                         </div>
                         <div>
