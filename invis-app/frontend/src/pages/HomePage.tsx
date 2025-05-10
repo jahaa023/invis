@@ -2,6 +2,7 @@ import logo from "../../public/favicon.svg";
 import shield from "../../public/icons/shield.svg"
 import dollar from "../../public/icons/dollar.svg"
 import globe from "../../public/icons/globe.svg"
+import Footer from "../components/Footer";
 
 function redirectRegister() {
     window.location.href = "/register"
@@ -22,7 +23,7 @@ export default function HomePage() {
                             to make sure your messages stay uncompromised.
                         </p>
                         <button 
-                            className="px-2.5 py-1.5 bg-brand rounded-[8px] cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-[8px] cursor-pointer bg-[radial-gradient(circle_at_center,_#0000_20.55%,_var(--color-brand)_94.17%)] bg-brand transition-all duration-200 ease-in hover:bg-brand-alt hover:font-bold"
                             title="Get started"
                             onClick={redirectRegister}
                         >
@@ -32,7 +33,7 @@ export default function HomePage() {
                 </div>
                 <div className="w-[80%] h-0.5 bg-white opacity-40 mb-7"></div>
                 <h1 className="text-3xl pb-7">What we can offer:</h1>
-                <div className="p-6 mb-7 border-white border-solid border-2 rounded-3xl max-w-[80%] flex flex-col items-center gap-6">
+                <div className="p-6 mb-15 border-white border-solid border-2 rounded-3xl max-w-[80%] flex flex-col items-center gap-6">
                     <div className="flex items-center gap-3 max-w-[80%]">
                         <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 bg-brand flex justify-center items-center">
                             <img className="w-[80%] h-[80%}" src={shield}/>
@@ -70,6 +71,7 @@ export default function HomePage() {
                     </div>
                 </div>
             </div>
+            <Footer />
         </>
     )
 }
