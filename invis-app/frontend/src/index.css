@@ -35,12 +35,3 @@ a {
 a:hover {
   text-decoration: underline;
 }
-
-/*
-@media (prefers-color-scheme: light) {
-  :root {
-    color: var(--color-text-black);
-    background-color: var(--background-light);
-  }
-}
-*/

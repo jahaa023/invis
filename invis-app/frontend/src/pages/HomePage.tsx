@@ -12,10 +12,10 @@ export default function HomePage() {
     return (
         <>
             <div className="w-screen- flex items-center flex-col">
-                <div className="pt-20 pb-20 flex justify-center items-center gap-8 w-[calc(100vw-100px)] px-[50px]">
-                    <img className="w-90" src={logo} alt="Invis Planet Logo" />
+                <div className="pt-20 pb-20 flex flex-col md:flex-row justify-center items-center gap-8 w-[calc(100vw-50px)] px-[25px] md:w-[calc(100vw-100px)] md:px-[50px]">
+                    <img className="w-43 md:w-60 lg:w-90" src={logo} alt="Invis Planet Logo" />
                     <div className="float-left clear-left">
-                        <h1 className="text-4xl font-bold bg-[linear-gradient(to_right,_var(--color-brand),_var(--color-brand-alt))] bg-clip-text text-transparent pb-2">
+                        <h1 className="text-2xl md:text-4xl font-bold bg-[linear-gradient(to_right,_var(--color-brand),_var(--color-brand-alt))] bg-clip-text text-transparent pb-2">
                             End to end encryption for your privacy.
                         </h1>
                         <p className="max-w-130 pb-2">
