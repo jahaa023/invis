@@ -36,3 +36,8 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+body {
+  width: 100vw;
+  overflow-x: hidden;
+}
