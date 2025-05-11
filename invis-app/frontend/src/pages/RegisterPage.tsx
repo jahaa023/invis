@@ -1,5 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 
+const authURL = `http://localhost:${process.env.AUTH_PORT}}`
+
 export default function RegisterPage() {
     const [error, setError] = useState("")
 

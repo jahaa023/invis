@@ -1,4 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
+import dotenv from 'dotenv';
+
+const authURL = `http://localhost:${process.env.AUTH_PORT}}`
 
 export default function RegisterPage() {
     const [error, setError] = useState("")
