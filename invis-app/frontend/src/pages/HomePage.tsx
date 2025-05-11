@@ -1,7 +1,3 @@
-import logo from "../../public/favicon.svg";
-import shield from "../../public/icons/shield.svg"
-import dollar from "../../public/icons/dollar.svg"
-import globe from "../../public/icons/globe.svg"
 import Footer from "../components/Footer";
 
 function redirectRegister() {
@@ -13,7 +9,7 @@ export default function HomePage() {
         <>
             <div className="w-screen- flex items-center flex-col">
                 <div className="pt-20 pb-20 flex flex-col md:flex-row justify-center items-center gap-8 w-[calc(100vw-50px)] px-[25px] md:w-[calc(100vw-100px)] md:px-[50px]">
-                    <img className="w-43 md:w-60 lg:w-90" src={logo} alt="Invis Planet Logo" />
+                    <img className="w-43 md:w-60 lg:w-90" src="/images/logo.svg" alt="Invis Planet Logo" />
                     <div className="float-left clear-left">
                         <h1 className="text-2xl md:text-4xl font-bold bg-[linear-gradient(to_right,_var(--color-brand),_var(--color-brand-alt))] bg-clip-text text-transparent pb-2">
                             End to end encryption for your privacy.
@@ -36,7 +32,7 @@ export default function HomePage() {
                 <div className="p-6 mb-15 border-white border-solid border-2 rounded-3xl max-w-[80%] flex flex-col items-center gap-6">
                     <div className="flex items-center gap-3 max-w-[80%]">
                         <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 max-w-16 max-h-16 bg-brand flex justify-center items-center">
-                            <img className="w-[80%] h-[80%}" src={shield}/>
+                            <img className="w-[80%] h-[80%}" src="/images/shield.svg"/>
                         </div>
                         <div>
                             <h1 className="text-2xl font-semibold">End to end encryption</h1>
@@ -48,7 +44,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center gap-3 max-w-[80%]">
                         <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 max-w-16 max-h-16 bg-brand flex justify-center items-center">
-                            <img className="w-[80%] h-[80%}" src={globe}/>
+                            <img className="w-[80%] h-[80%}" src="/images/globe.svg"/>
                         </div>
                         <div>
                             <h1 className="text-2xl font-semibold">Open source</h1>
@@ -60,7 +56,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center gap-3 max-w-[80%]">
                         <div className="p-1.5 rounded-[4rem] min-w-16 min-h-16 max-w-16 max-h-16 bg-brand flex justify-center items-center">
-                            <img className="w-[80%] h-[80%}" src={dollar}/>
+                            <img className="w-[80%] h-[80%}" src="/images/dollar.svg"/>
                         </div>
                         <div>
                             <h1 className="text-2xl font-semibold">No ads or monetization</h1>

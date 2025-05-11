@@ -5,7 +5,7 @@ import HomePage from "./pages/HomePage.tsx";
 
 export default function App() {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/">
             <Routes>
                 <Route index element={<Navigate to={'/home'} />}/>
                 <Route path={'/home'} element={<HomePage/>}/>

@@ -11,6 +11,8 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  base: "http://localhost:5173/",
+  publicDir: "public",
 
   clearScreen: false,
   // Tauri expects a fixed port, fail if that port is not available
