@@ -1,7 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
-import dotenv from 'dotenv';
 
-const authURL = `http://localhost:${process.env.AUTH_PORT}}`
+const authURL = import.meta.env.VITE_AUTH_URL;
 
 export default function RegisterPage() {
     const [error, setError] = useState("")

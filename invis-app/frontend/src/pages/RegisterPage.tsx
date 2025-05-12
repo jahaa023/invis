@@ -1,26 +1,56 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 
-const authURL = `http://localhost:${process.env.AUTH_PORT}}`
+const authURL = import.meta.env.VITE_AUTH_URL;
+
+// Define formdata type
+interface FormData {
+    username: string;
+    password: string;
+}
 
 export default function RegisterPage() {
+    // Define states
     const [error, setError] = useState("")
+    const [formData, setFormData] = useState<FormData>({ username: '', password: '' });
 
-    const [username, setUsername] = useState<any | null>(null);
-    const onChangeUsername = (e: ChangeEvent) => {
-        const element = e.currentTarget as HTMLInputElement
-        setUsername(element.value)
-    }
+    // Updates formdata on input
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
-    const [password, setPassword] = useState<any | null>(null);
-    const onChangePassword = (e: ChangeEvent) => {
-        const element = e.currentTarget as HTMLInputElement
-        setPassword(element.value)
-    }
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // When form is submitted, do a post request to auth server
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError("Something went wrong.")
-    }
+
+        try {
+            const response = await fetch(`${authURL}/register`, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const res_json = await response.json()
+
+            if (response.ok) {
+                console.log("Success")
+                // window.location.href = "/main"
+            } else {
+                if (response.status == 400 && res_json.error.code == "VALIDATOR_ERROR") {
+                    const error = res_json.error.errors[0].msg
+                    setError(error)
+                } else {
+                    const error = res_json.error.message
+                    setError(error)
+                }
+            }
+        } catch (error) {
+            console.error(error)
+            setError('Something went wrong.');
+        }
+    };
 
     function homeRedirect() {
         window.location.href = "/home"
@@ -28,22 +58,29 @@ export default function RegisterPage() {
 
     return (
         <div className="w-screen h-screen flex justify-center items-center">
-            <form className="w-fit h-fit flex flex-col items-center gap-3 text-center" onSubmit={handleSubmit}>
+            <form className="w-fit h-fit flex flex-col items-center gap-3 text-center max-h-[80vh] overflow-y-scroll" onSubmit={handleSubmit}>
                 <img src="/favicon.svg" alt="Invis Planet Logo" className="w-12 cursor-pointer" onClick={homeRedirect} />
                 {error && <p className="text-warning-red">{error}</p>}
                 <h1 className="font-medium text-3xl">Create an account</h1>
                 <input 
                 type="text"
                 placeholder="Username"
+                name='username'
                 className="p-2 w-[calc(100%-0.5rem)] border-1 border-text-light rounded-md font-light"
-                onChange={onChangeUsername}
+                value={formData.username}
+                onChange={handleChange}
+                min={5}
+                max={20}
                 required
                 />
                 <input 
                 type="password"
                 placeholder="Password"
+                name='password'
                 className="p-2 w-[calc(100%-0.5rem)] border-1 border-text-light rounded-md font-light"
-                onChange={onChangePassword}
+                value={formData.password}
+                onChange={handleChange}
+                min={8}
                 required
                 />
                 <button

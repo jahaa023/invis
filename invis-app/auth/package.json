@@ -14,9 +14,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "argon2": "^0.43.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "pg": "^8.15.6",
     "tsx": "^4.19.4"
   },
