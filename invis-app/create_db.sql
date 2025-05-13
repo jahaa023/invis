@@ -18,8 +18,8 @@ CREATE TABLE session_tokens (
     token_hash varchar(255) NOT NULL,
     user_id UUID NOT NULL,
     session_id UUID NOT NULL,
-    issued_at int NOT NULL,
-    expires_at int NOT NULL
+    issued_at timestamptz NOT NULL,
+    expires_at timestamptz NOT NULL
 )
 
 CREATE TABLE public_keys (

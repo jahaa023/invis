@@ -13,11 +13,12 @@ import { validationResult } from 'express-validator';
 
 // Setup for the rest of the file
 const app = express();
+const frontendUrl = "http://localhost:5173"
 
 app.use(
     cors({
         credentials: true,
-        origin: 'http://localhost:5173'
+        origin: frontendUrl
     }),
 );
 app.use(express.json());
@@ -70,7 +71,7 @@ async function createSession({ req, userId, }: { req: Request; userId: UUID; }) 
         // Insert auth token
         await client.query(
             `INSERT INTO session_tokens (id, token_hash, user_id, session_id, issued_at, expires_at)
-             VALUES ($1::uuid, $2::text, $3::uuid, $4::uuid, $5::int, $6::int)`,
+             VALUES ($1::uuid, $2::text, $3::uuid, $4::uuid, $5, $6)`,
             [
                 sessionToken.id,
                 sessionToken.tokenHash,
@@ -122,10 +123,10 @@ async function validateSession(sessionToken: string) {
 }
 
 // Endpoint for retriving user id of logged in user, and validating their session
-app.post('/validate-session', async (req, res) => {
-    const sessionToken = req.body.token;
+app.get('/validate-session', async (req, res) => {
+    const sessionToken = req.cookies.user_session;
 
-    // If session token is not found in the body
+    // If session token is not found in the cookies
     if (!sessionToken) {
         res.status(400).json({
             error: {
@@ -228,7 +229,7 @@ app.post('/login', async (req, res) => {
             error: {
                 code: 'BAD_REQUEST',
                 message:
-                    'Request body is missing required fields: username, password.',
+                    'Username or password is empty.',
             },
         });
         return;
@@ -279,6 +280,9 @@ app.post('/login', async (req, res) => {
             sameSite: 'lax',
             maxAge: sessionToken.expiresInMs,
         });
+
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Origin', frontendUrl);
 
         // Return status
         res.status(200).json({

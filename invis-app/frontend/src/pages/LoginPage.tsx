@@ -1,26 +1,51 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 
 const authURL = import.meta.env.VITE_AUTH_URL;
 
-export default function RegisterPage() {
+// Define formdata type
+interface FormData {
+    username: string;
+    password: string;
+}
+
+export default function LoginPage() {
+    // Define states
     const [error, setError] = useState("")
+    const [formData, setFormData] = useState<FormData>({ username: '', password: '' });
 
-    const [username, setUsername] = useState<any | null>(null);
-    const onChangeUsername = (e: ChangeEvent) => {
-        const element = e.currentTarget as HTMLInputElement
-        setUsername(element.value)
-    }
+    // Updates formdata on input
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
-    const [password, setPassword] = useState<any | null>(null);
-    const onChangePassword = (e: ChangeEvent) => {
-        const element = e.currentTarget as HTMLInputElement
-        setPassword(element.value)
-    }
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // When form is submitted, do a post request to auth server
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError("Something went wrong.")
-    }
+
+        try {
+            const response = await fetch(`${authURL}/login`, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+                credentials: "include"
+            });
+
+            const res_json = await response.json()
+
+            if (response.ok) {
+                window.location.href = "/chats"
+            } else {
+                const error = res_json.error.message
+                setError(error)
+            }
+        } catch (error) {
+            console.error(error)
+            setError('Something went wrong.');
+        }
+    };
 
     function homeRedirect() {
         window.location.href = "/home"
@@ -36,15 +61,20 @@ export default function RegisterPage() {
                 type="text"
                 placeholder="Username"
                 className="p-2 w-[calc(100%-0.5rem)] border-1 border-text-light rounded-md font-light"
-                onChange={onChangeUsername}
+                onChange={handleChange}
                 required
+                name='username'
+                min={5}
+                max={20}
                 />
                 <input 
                 type="password"
                 placeholder="Password"
                 className="p-2 w-[calc(100%-0.5rem)] border-1 border-text-light rounded-md font-light"
-                onChange={onChangePassword}
+                onChange={handleChange}
                 required
+                name='password'
+                min={8}
                 />
                 <button
                     type='submit'

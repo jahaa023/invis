@@ -7,6 +7,7 @@ import FriendsListPage from "./pages/FriendsListPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import HelpCenterPage from "./pages/HelpCenterPage.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
+import AuthRoute from './components/AuthRoute.tsx';
 
 export default function App() {
     return (
@@ -17,7 +18,11 @@ export default function App() {
                 <Route path={'/register'} element={<RegisterPage/>}/>
                 <Route path={'/login'} element={<LoginPage/>}/>
                 <Route path="/" element={<MainLayout />}>
-                    <Route path={'chats'} element={<ChatsPage/>}/>
+                    <Route path={'chats'} element={
+                        <AuthRoute>
+                            <ChatsPage/>
+                        </AuthRoute>
+                    }/>
                     <Route path={'friends_list'} element={<FriendsListPage/>}/>
                     <Route path={'settings'} element={<SettingsPage/>}/>
                     <Route path={'help_center'} element={<HelpCenterPage/>}/>
