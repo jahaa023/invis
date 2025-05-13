@@ -123,10 +123,23 @@ async function validateSession(sessionToken: string) {
 }
 
 // Endpoint for retriving user id of logged in user, and validating their session
-app.get('/validate-session', async (req, res) => {
-    const sessionToken = req.cookies.user_session;
+app.all('/validate-session', async (req, res) => {
+    let sessionToken = null
+    if (req.method === 'GET') {
+        sessionToken = req.cookies.user_session;
+    } else if (req.method === 'POST') {
+        sessionToken = req.body.user_session;
+    } else {
+        res.status(405).json({
+            error: {
+                code: 'METHOD_NOT_ALLOWED',
+                message: 'Allowed methods: GET, POST',
+            },
+        });
+        return;
+    }
 
-    // If session token is not found in the cookies
+    // If session token is not found in the cookies or body
     if (!sessionToken) {
         res.status(400).json({
             error: {
