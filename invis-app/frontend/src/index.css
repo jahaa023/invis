@@ -9,6 +9,8 @@
   --background-light: #ffffff;
   --background-black: #262626;
   --color-warning-red: #d43939;
+  --color-bg-header-button: #363636;
+  --color-bg-header-button-hover: #5A5A5A;
 }
 
 :root {

@@ -10,11 +10,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { registerValidator } from './validators/registerValidator';
 import { validationResult } from 'express-validator';
-import { error } from 'console';
 
 // Setup for the rest of the file
 const app = express();
-
 
 app.use(
     cors({
