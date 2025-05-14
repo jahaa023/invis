@@ -53,7 +53,7 @@ export default function LoginPage() {
 
     return (
         <div className="w-screen h-screen flex justify-center items-center">
-            <form className="w-fit h-fit p-14 bg-bg-black-lighter border-black-lighter-border border-[1px] rounded-2xl flex flex-col items-center gap-3 text-center max-h-[80vh] overflow-y-scroll" onSubmit={handleSubmit}>
+            <form className="w-100 h-fit p-8 bg-bg-black-lighter border-black-lighter-border border-[1px] rounded-2xl flex flex-col items-center gap-3 text-center max-h-[80vh] overflow-y-scroll" onSubmit={handleSubmit}>
                 <img src="/favicon.svg" alt="Invis Planet Logo" className="w-12 cursor-pointer" onClick={homeRedirect} />
                 {error && <p className="text-warning-red">{error}</p>}
                 <h1 className="font-medium text-3xl">Log in</h1>

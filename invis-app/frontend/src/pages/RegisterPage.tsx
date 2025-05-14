@@ -59,7 +59,6 @@ export default function RegisterPage() {
                     ascii: response_json.ascii,
                     taken: response_json.taken
                 });
-                console.log(usernameValidation)
             } else {
                 setUsernameValidationError(true)
             }
