@@ -145,6 +145,19 @@ app.post('/upload_profilepic', isAuthenticated, upload.single('file'), (req: Aut
     res.json({ message: 'File uploaded successfully' });
 });
 
+// If non of the endpoints above matched
+app.all(/(.*)/, (req, res) => {
+    res = returnGenError(res, 404)
+    return
+});
+
+// All errors get sent as internal server errors
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
+    res = returnGenError(res, 500)
+    return
+});
+
 // Listen on port
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

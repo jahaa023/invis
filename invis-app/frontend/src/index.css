@@ -11,6 +11,9 @@
   --color-warning-red: #d43939;
   --color-bg-header-button: #363636;
   --color-bg-header-button-hover: #5A5A5A;
+  --color-bg-black-lighter: #2D2D2D;
+  --color-black-lighter-border: #686868;
+  --color-positive-green: #22B700;
 }
 
 :root {

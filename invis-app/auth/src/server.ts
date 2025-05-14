@@ -211,6 +211,21 @@ app.post('/register', registerValidator(), async (req: Request, res: Response) =
             `,
             [user_id, username, hashed_password],
         );
+
+        // Create a session token
+        const { sessionToken } = await createSession({req: req, userId: user_id});
+
+        // Put token inside of a cookie
+        res.cookie('user_session', sessionToken.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: sessionToken.expiresInMs,
+        });
+
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Origin', frontendUrl);
+
         res.status(201).json({
             message: 'User registered successfully!',
             data: { user: { user_id, username } },
@@ -341,6 +356,60 @@ app.post('/logout', async (req, res) => {
         throw err;
     }
 });
+
+// Endpoint for live validating username
+app.post('/validate-username', async (req, res) => {
+    // Get username in post data
+    const username = req.body.username;
+
+    // Define response json
+    let responseJson = {
+        chars: true,
+        ascii: false,
+        whitespace: false,
+        taken: false
+    }
+
+    // If username is empty
+    if (!username) {
+        res.status(200).json(responseJson);
+        return;
+    }
+
+    // Check if username has certain lenght
+    const minLength = 5;
+    const maxLength = 20;
+    if (username.length >= minLength && username.length <= maxLength) {
+        responseJson.chars = false;
+    } else {
+        responseJson.chars = true;
+    }
+
+    // Check if username contains non ascii chars
+    if (/^[\x00-\x7F]*$/.test(username)) {
+        responseJson.ascii = true
+    } else {
+        responseJson.ascii = false
+    }
+
+    // Check if username contains whitespace
+    if (/\s/.test(username)) {
+        responseJson.whitespace = true
+    } else {
+        responseJson.whitespace = false
+    }
+
+    // Check if username is taken
+    const { rows } = await db.query('SELECT * FROM users WHERE username = $1::text', [ username ])
+    if (!rows.length) {
+        responseJson.taken = false
+    } else {
+        responseJson.taken = true
+    }
+
+    // Send result
+    res.status(200).json(responseJson)
+})
 
 // If non of the endpoints above matched
 app.all(/(.*)/, (req, res) => {
