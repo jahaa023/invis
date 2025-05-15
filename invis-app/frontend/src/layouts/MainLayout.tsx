@@ -125,8 +125,18 @@ export default function MainLayout() {
                     <img className="sm:hidden z-30 inline absolute right-0 mr-4 rounded-full w-9 h-9" src={userInfo?.profile_picture_url} />
                 }
             </header>
-            <div className="h-full overflow-x-scroll scroll-auto">
-                <Outlet />
+            <div className="w-screen h-full overflow-hidden flex">
+                <div className="h-full p-3 w-75 border-r-2 border-black-lighter-border">
+                    <div className="w-full h-full flex justify-center items-center">
+                        <div className="text-center">
+                            <h1 className="font-bold text-4xl opacity-50">No chats yet...</h1>
+                            <p className="opacity-50">Chat with friends to start the conversation!</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="h-full w-[calc(100%-300px)] overflow-x-scroll scroll-auto">
+                    <Outlet />
+                </div>
             </div>
         </div>
     );

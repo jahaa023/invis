@@ -38,7 +38,8 @@ CREATE TABLE chats (
 CREATE TABLE chat_members (
     id UUID NOT NULL PRIMARY KEY,
     chat_id UUID NOT NULL,
-    user_id UUID NOT NULL
+    user_id UUID NOT NULL,
+    last_accessed int NOT NULL -- Unix timestamp
 );
 
 CREATE TABLE message_embed (
