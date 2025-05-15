@@ -6,8 +6,8 @@
   --color-brand-alt: #00ecef;
   --color-text-black: #262626;
   --color-text-light: #ffffff;
-  --background-light: #ffffff;
-  --background-black: #262626;
+  --color-background-light: #ffffff;
+  --color-background-black: #262626;
   --color-warning-red: #d43939;
   --color-bg-header-button: #363636;
   --color-bg-header-button-hover: #5A5A5A;
@@ -22,11 +22,11 @@
   font-weight: 400;
 
   color: var(--color-text-light);
-  background-color: var(--background-black);
+  background-color: var(--color-background-black);
 
   color-scheme: dark;
   color: var(--color-text-light);
-  background-color: var(--background-black);
+  background-color: var(--color-background-black);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
