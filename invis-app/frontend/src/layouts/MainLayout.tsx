@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useEffect, useState} from 'react'
+import { io } from 'socket.io-client'
 const apiURL = import.meta.env.VITE_API_URL;
+const socket = io(apiURL);
 
 export default function MainLayout() {
     type User = {
@@ -38,7 +40,8 @@ export default function MainLayout() {
         }
     ]
 
-    // Gets info about logged in user from backend
+    // Gets info about logged in user from backend and connects to websocket
+    let socketConnected = false;
     useEffect(()=>{
         fetch(`${apiURL}/user_info`, {
             method: "GET",
@@ -50,6 +53,10 @@ export default function MainLayout() {
         .then(response => {
             setUserInfo(response.data)
             setLoading(false);
+            if (socketConnected == false) {
+                socket.emit('join_online', response.data.user_id)
+                socketConnected = true;
+            }
         })
 
         .catch(error => {

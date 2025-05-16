@@ -13,15 +13,25 @@ import axios from 'axios';
 import { Pool } from 'pg';
 import { UUID } from 'crypto';
 import path from 'path';
-import { error } from 'console';
+import { Server } from "socket.io";
+import setupSocket from "./socket/index"
 
 // Define consts and setup
 dotenv.config();
-
-const app = express();
 const port = process.env.SERVER_PORT || 5000;
 const frontendURL = process.env.FRONTEND_URL
 const authURL = process.env.AUTH_URL
+
+const { createServer } = require('node:http')
+const app = express();
+const server = createServer(app)
+const io = new Server(server, {
+    cors: {
+        origin: frontendURL,
+        methods: ['GET', 'POST']
+    }
+});
+setupSocket(io)
 
 app.use(express.json());
 app.use(cookieParser());
@@ -211,6 +221,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Listen on port
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
