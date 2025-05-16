@@ -146,11 +146,28 @@ app.post('/upload_profilepic', isAuthenticated, upload.single('file'), (req: Aut
 });
 
 // Route to search for users to add friend
-app.post('/friend_search', isAuthenticated, async (req, res) => {
+app.post('/friend_search', isAuthenticated, async (req: AuthRequest, res) => {
     const searchQuery = req.body.searchQuery
 
-    // Get users with username wildcard
-    const { rows } = await pool.query(`SELECT * FROM users WHERE lower(username) LIKE CONCAT('%', $1::text, '%') LIMIT 10`, [ searchQuery ])
+    // Get users with username wildcard, that are not yourself, that are not your friend,
+    // that you have not sent a request to and that havent sent a request to you. Limit to 10 rows
+    const { rows } = await pool.query(`
+    SELECT * FROM users u
+    WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', $1::text, '%'))
+        AND u.id <> $2::uuid
+        AND NOT EXISTS (
+            SELECT 1 FROM friends_list f
+            WHERE (f.user_id_1 = $2::uuid AND f.user_id_2 = u.id)
+            OR (f.user_id_2 = $2::uuid AND f.user_id_1 = u.id)
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM friend_requests fr
+            WHERE (fr.outgoing = $2::uuid AND fr.incoming = u.id)
+            OR (fr.incoming = $2::uuid AND fr.outgoing = u.id)
+        )
+    LIMIT 10;
+    `, [searchQuery, req.userId]);
+
     if (!rows.length) {
         res.status(200).json({
             found: 0,
