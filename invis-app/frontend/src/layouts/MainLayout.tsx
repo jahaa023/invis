@@ -29,13 +29,13 @@ export default function MainLayout() {
             title: "Friends List"
         },
         {
-            to : "/settings",
-            title: "Settings"
+            to : "/add_friends",
+            title : "Add friends"
         },
         {
-            to : "/help_center",
-            title: "Help Center"
-        },
+            to : "/settings",
+            title: "Settings"
+        }
     ]
 
     // Gets info about logged in user from backend
@@ -85,20 +85,22 @@ export default function MainLayout() {
                 {/* Dropdown for smaller screens */}
                 {dropdown &&
                 <div className="sm:hidden w-screen h-screen fixed top-0 left-0 bg-transparent backdrop-blur-md z-40">
-                    <div className="z-50 w-[80%] p-2.5 h-screen bg-background-black border-r-2 border-gray-500 relative">
+                    <div className="z-50 w-[80%] p-2.5 h-screen bg-background-black border-r-2 border-black-lighter-border relative">
                         <div className="max-h-[calc(100%-50px)] overflow-x-hidden overflow-y-scroll flex flex-col gap-3">
                             {navBarLinks.map((link) => (
-                                <NavLink
-                                    to={link.to}
-                                    onClick={() => setDropdown(false)}
-                                    className={({ isActive }) =>
-                                        isActive
-                                            ? "px-3 py-1.5 font-medium rounded-md cursor-pointer bg-white !text-text-black !no-underline"
-                                            : "px-3 py-1.5 font-medium !text-text-light rounded-md bg-bg-header-button cursor-pointer hover:bg-bg-header-button-hover hover:text-text-black !no-underline"
-                                    }
-                                >
-                                    {link.title}
-                                </NavLink>
+                                <>
+                                    <NavLink
+                                        to={link.to}
+                                        onClick={() => setDropdown(false)}
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? "px-3 py-1.5 font-medium rounded-md cursor-pointer bg-white !text-text-black !no-underline"
+                                                : "px-3 py-1.5 font-medium !text-text-light rounded-md bg-bg-header-button cursor-pointer hover:bg-bg-header-button-hover hover:text-text-black !no-underline"
+                                        }
+                                    >
+                                        {link.title}
+                                    </NavLink>
+                                </>
                             ))}
                         </div>
                         <div className="h-[50px] w-full absolute bottom-0 left-0 m-2.5 flex items-center">
@@ -126,7 +128,7 @@ export default function MainLayout() {
                 }
             </header>
             <div className="w-screen h-full overflow-hidden flex">
-                <div className="h-full p-3 w-75 border-r-2 border-black-lighter-border">
+                <div className="hidden lg:inline h-full p-3 w-75 border-r-2 border-black-lighter-border">
                     <div className="w-full h-full flex justify-center items-center">
                         <div className="text-center">
                             <h1 className="font-bold text-4xl opacity-50">No chats yet...</h1>
@@ -134,7 +136,7 @@ export default function MainLayout() {
                         </div>
                     </div>
                 </div>
-                <div className="h-full w-[calc(100%-300px)] overflow-x-scroll scroll-auto">
+                <div className="h-full lg:w-[calc(100%-300px)] w-full overflow-x-scroll scroll-auto">
                     <Outlet />
                 </div>
             </div>

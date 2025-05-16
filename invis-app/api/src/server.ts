@@ -145,6 +145,41 @@ app.post('/upload_profilepic', isAuthenticated, upload.single('file'), (req: Aut
     res.json({ message: 'File uploaded successfully' });
 });
 
+// Route to search for users to add friend
+app.post('/friend_search', isAuthenticated, async (req, res) => {
+    const searchQuery = req.body.searchQuery
+
+    // Get users with username wildcard
+    const { rows } = await pool.query(`SELECT * FROM users WHERE lower(username) LIKE CONCAT('%', $1::text, '%') LIMIT 10`, [ searchQuery ])
+    if (!rows.length) {
+        res.status(200).json({
+            found: 0,
+            message: `No users found with a username containing '${searchQuery}'.`
+        })
+        return
+    }
+
+    type searchResult = {
+        user_id: string;
+        username: string;
+        profile_picture_url: string;
+    };
+
+    let resultArray : searchResult[] = [];
+    rows.forEach(row => {
+        resultArray.push({
+            user_id : row.id,
+            username : row.username,
+            profile_picture_url : req.protocol + '://' + req.get('host') + '/uploads/' + row.profile_picture
+        })
+    });
+
+    res.status(200).json({
+        found: 1,
+        data: resultArray
+    })
+})
+
 // If non of the endpoints above matched
 app.all(/(.*)/, (req, res) => {
     res = returnGenError(res, 404)

@@ -5,7 +5,7 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import FriendsListPage from "./pages/FriendsListPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
-import HelpCenterPage from "./pages/HelpCenterPage.tsx";
+import AddFriendsPage from "./pages/AddFriendsPage.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
 import AuthRoute from './components/AuthRoute.tsx';
 
@@ -23,9 +23,24 @@ export default function App() {
                             <ChatsPage/>
                         </AuthRoute>
                     }/>
-                    <Route path={'friends_list'} element={<FriendsListPage/>}/>
-                    <Route path={'settings'} element={<SettingsPage/>}/>
-                    <Route path={'help_center'} element={<HelpCenterPage/>}/>
+
+                    <Route path={'friends_list'} element={
+                        <AuthRoute>
+                            <FriendsListPage/>
+                        </AuthRoute>
+                    }/>
+
+                    <Route path={'settings'} element={
+                        <AuthRoute>
+                            <SettingsPage/>
+                        </AuthRoute>
+                    }/>
+
+                    <Route path={'add_friends'} element={
+                        <AuthRoute>
+                            <AddFriendsPage />
+                        </AuthRoute>
+                    }/>
                 </Route>
                 <Route path={'*'} element={<Navigate to={'/home'} />}/>
             </Routes>
