@@ -1,11 +1,12 @@
 import { Server } from "socket.io";
 import { UUID } from 'crypto';
 
-// Sets up socket io
+// Class for managing websocket
 export default class socketHandler {
     private io: Server;
     private connectedUsers: Map<string, string>;
 
+    // Connects to socket on init
     constructor(io: Server) {
         this.io = io
         this.connectedUsers = new Map<string, string>();
@@ -27,9 +28,30 @@ export default class socketHandler {
             });
         })
     }
+
+    // Returns true if user is online, false otherwise
+    isOnline(userIdCheck : UUID): boolean {
+        let online: boolean = false;
+        for (const [userId, id] of this.connectedUsers.entries()) {
+            if (userId === userIdCheck) {
+                online = true
+                break;
+            }
+        }
+
+        return online
+    }
     
-    // Function to send user id to a person
-    sendFriendRequest(userId : UUID): void {
-        
+    // Function to send friend request instantly if user is online
+    sendFriendRequest(userIdIncoming : UUID): void {
+        // Check if user is online
+        for (const [userId, id] of this.connectedUsers.entries()) {
+            if (userId === userIdIncoming) {
+                this.io.to(id).emit("friend_request", {
+                    placeholder: "placeholder"
+                })
+                break;
+            }
+        }
     }
 }

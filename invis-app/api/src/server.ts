@@ -10,7 +10,7 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import axios from 'axios';
-import { Pool } from 'pg';
+import { Pool, Client, PoolConfig, ClientConfig } from 'pg';
 import { UUID } from 'crypto';
 import path from 'path';
 import { Server } from "socket.io";
@@ -41,7 +41,7 @@ app.use(cors({
 }));
 
 // Set up database connection
-const pool = new Pool({
+const poolConfig : PoolConfig = {
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
     host: process.env.PGHOST,
@@ -50,7 +50,18 @@ const pool = new Pool({
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
-});
+}
+
+const clientConfig : ClientConfig = {
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    host: process.env.PGHOST,
+    port: Number(process.env.PGPORT),
+    database: process.env.PGDATABASE,
+    connectionTimeoutMillis: 2000,
+}
+
+const pool = new Pool(poolConfig);
 
 // Configure multer
 const storage = multer.diskStorage({
@@ -204,6 +215,86 @@ app.post('/friend_search', isAuthenticated, async (req: AuthRequest, res) => {
     res.status(200).json({
         found: 1,
         data: resultArray
+    })
+})
+
+// Sends a friend request to someone
+app.post('/send_friend_request', isAuthenticated, async (req: AuthRequest, res) => {
+    const friendRequestUid = req.body.userId;
+
+    // If user id is missing
+    if (!friendRequestUid) {
+        res.status(400).json({
+            error: {
+                code: "BAD_REQUEST",
+                message: "The request is missing the following fields: userId"
+            }
+        })
+        return;
+    }
+
+    // If user is yourself
+    if (friendRequestUid === req.userId) {
+        res.status(400).json({
+            error: {
+                code: "BAD_REQUEST",
+                message: "This user is yourself."
+            }
+        })
+        return;
+    }
+
+    // Create a client
+    const client = new Client(clientConfig)
+    await client.connect()
+
+    try {
+        // If user is already in friends list
+        const result = await client.query(`
+            SELECT * FROM friends_list
+            WHERE user_id_1 = $1::uuid AND user_id_2 = $2::uuid;`,
+        [req.userId, friendRequestUid])
+        if (result.rows.length > 0) {
+            res.status(400).json({
+                error: {
+                    code: "BAD_REQUEST",
+                    message: "This user is already in your friends list."
+                }
+            })
+            return;
+        }
+
+        // If user has already sent a request or has a request from this person
+        const result2 = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE outgoing = $1::uuid AND incoming = $2::uuid
+            OR outgoing = $2::uuid AND incoming = $1::uuid;`,
+        [req.userId, friendRequestUid])
+        if (result2.rows.length > 0) {
+            res.status(400).json({
+                error: {
+                    code: "BAD_REQUEST",
+                    message: "You have already sent a request to this user, or the user has sent you a request."
+                }
+            })
+            return;
+        }
+
+    } catch (err) {
+        throw err;
+    } finally {
+        await client.end()
+    }
+
+    // Insert friend request in database
+    await pool.query(`INSERT INTO friend_requests (outgoing, incoming) VALUES ($1::uuid, $2::uuid)`, [req.userId, friendRequestUid])
+
+    // Send friend request in websocket as well
+    socket.sendFriendRequest(friendRequestUid)
+
+    // Return response
+    res.status(201).json({
+        message: "Friend request sent!"
     })
 })
 
