@@ -14,7 +14,7 @@ import { Pool } from 'pg';
 import { UUID } from 'crypto';
 import path from 'path';
 import { Server } from "socket.io";
-import setupSocket from "./socket/index"
+import socketHandler from "./socket/index"
 
 // Define consts and setup
 dotenv.config();
@@ -31,7 +31,7 @@ const io = new Server(server, {
         methods: ['GET', 'POST']
     }
 });
-setupSocket(io)
+const socket = new socketHandler(io)
 
 app.use(express.json());
 app.use(cookieParser());
