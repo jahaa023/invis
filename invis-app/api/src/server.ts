@@ -299,6 +299,44 @@ app.post('/send_friend_request', isAuthenticated, async (req: AuthRequest, res) 
     })
 })
 
+// Gets a users incoming and outgoing friend requests
+app.get('friend_requests', isAuthenticated, async (req: AuthRequest, res) => {
+    type friendRequest = {
+        userId: string;
+        username: string;
+        profile_picture_url: string;
+        rowId: string;
+    }
+
+    const incomingRequests: friendRequest[] = []
+    const outgoingRequests: friendRequest[] = []
+
+    // Create a client
+    const client = new Client(clientConfig)
+    await client.connect()
+
+    try {
+        // Get incoming requests
+        const result = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE fr.incoming = $1::uuid`,
+        [req.userId])
+
+        result.rows.forEach((row) => {
+            incomingRequests.push({
+                userId: row.outgoing,
+                username: row.username,
+                profile_picture_url: row.pfp,
+                rowId: row.id
+            })
+        })
+    } catch (err) {
+        throw err;
+    } finally {
+        await client.end()
+    }
+})
+
 // If non of the endpoints above matched
 app.all(/(.*)/, (req, res) => {
     res = returnGenError(res, 404)
