@@ -287,7 +287,8 @@ app.post('/send_friend_request', isAuthenticated, async (req: AuthRequest, res) 
     }
 
     // Insert friend request in database
-    await pool.query(`INSERT INTO friend_requests (outgoing, incoming) VALUES ($1::uuid, $2::uuid)`, [req.userId, friendRequestUid])
+    const rowId = crypto.randomUUID()
+    await pool.query(`INSERT INTO friend_requests (id, outgoing, incoming) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [rowId, req.userId, friendRequestUid])
 
     // Send friend request in websocket as well
     socket.sendFriendRequest(friendRequestUid)

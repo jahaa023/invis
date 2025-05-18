@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useAppContext } from '../AppContext';
 import { useEffect, useState} from 'react'
 import { io } from 'socket.io-client'
 const apiURL = import.meta.env.VITE_API_URL;
@@ -15,6 +16,7 @@ export default function MainLayout() {
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dropdown, setDropdown] = useState(false);
+    const { popupValue, showPopup, popupActive } = useAppContext();
 
     interface NavBarLink {
         to: string;
@@ -147,6 +149,11 @@ export default function MainLayout() {
                     <Outlet />
                 </div>
             </div>
+            {popupActive &&
+                <div className="fixed bottom-0 right-0 p-2 rounded-xl bg-bg-header-button border-black-lighter-border border-2 m-2">
+                    <p>{popupValue}</p>
+                </div>
+            }
         </div>
     );
 }
