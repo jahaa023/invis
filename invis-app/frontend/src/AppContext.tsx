@@ -1,11 +1,13 @@
 // Global functions and values are stored here
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface AppContextType {
     popupValue: string;
     popupActive: boolean;
-    showPopup: (message: string, timeout : number) => void;
+    showPopup: (message: string, timeout? : number, type?: string) => void;
+    popupType: string;
+    popupIsVisible: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -18,16 +20,36 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Everything needed for a universal popup
     const [popupValue, setPopupValue] = useState("");
     const [popupActive, setPopupActive] = useState(false);
-    const showPopup = (message: string, timeout: number = 2000) => {
+    const [popupType, setPopupType] = useState("");
+    const [popupIsVisible, setPopupIsVisible] = useState(false);
+
+    // Use ref to track the timeout ID
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const showPopup = (message: string, timeout: number = 2000, type: string = "info") => {
+        // Clear previous timeout if it exists
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
         setPopupActive(true)
         setPopupValue(message);
-        setTimeout(() => {
-            setPopupActive(false)
-        }, timeout)
+        setPopupType(type)
+        setPopupIsVisible(true);
+
+        // Set new timeout and store its ID
+        timeoutRef.current = setTimeout(() => {
+            setPopupIsVisible(false);
+
+            setTimeout(() => {
+                setPopupActive(false);
+                timeoutRef.current = null; // Clear ref after use
+            }, 300);
+        }, timeout);
     }
 
     return (
-        <AppContext.Provider value={{popupValue, popupActive, showPopup}}>
+        <AppContext.Provider value={{popupValue, popupActive, showPopup, popupType, popupIsVisible}}>
             {children}
         </AppContext.Provider>
     );

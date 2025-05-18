@@ -218,6 +218,77 @@ app.post('/friend_search', isAuthenticated, async (req: AuthRequest, res) => {
     })
 })
 
+// Gets a users incoming and outgoing friend requests
+app.get('/friend_requests', isAuthenticated, async (req: AuthRequest, res) => {
+    type friendRequest = {
+        userId: string;
+        username: string;
+        profile_picture_url: string;
+        rowId: string;
+    }
+
+    const incomingRequests: friendRequest[] = []
+    const outgoingRequests: friendRequest[] = []
+
+    // Create a client
+    const client = new Client(clientConfig)
+    await client.connect()
+
+    try {
+        // Get incoming requests
+        const result = await client.query(`
+            SELECT
+                users.id AS user_id,
+                users.username,
+                users.profile_picture,
+                friend_requests.id AS row_id
+            FROM friend_requests
+            JOIN users ON friend_requests.outgoing = users.id
+            WHERE friend_requests.incoming = $1::uuid;`,
+        [req.userId])
+
+        result.rows.forEach((row) => {
+            incomingRequests.push({
+                userId: row.user_id,
+                username: row.username,
+                profile_picture_url: req.protocol + '://' + req.get('host') + '/uploads/' + row.profile_picture,
+                rowId: row.row_id
+            })
+        })
+
+        // Get outgoing requests
+        const result2 = await client.query(`
+            SELECT
+                users.id AS user_id,
+                users.username,
+                users.profile_picture,
+                friend_requests.id AS row_id
+            FROM friend_requests
+            JOIN users ON friend_requests.incoming = users.id
+            WHERE friend_requests.outgoing = $1::uuid;`,
+        [req.userId])
+
+        result2.rows.forEach((row) => {
+            outgoingRequests.push({
+                userId: row.user_id,
+                username: row.username,
+                profile_picture_url: req.protocol + '://' + req.get('host') + '/uploads/' + row.profile_picture,
+                rowId: row.row_id
+            })
+        })
+    } catch (err) {
+        throw err;
+    } finally {
+        await client.end()
+    }
+
+    // Return response
+    res.status(200).json({
+        outgoing: outgoingRequests,
+        incoming: incomingRequests
+    })
+})
+
 // Sends a friend request to someone
 app.post('/send_friend_request', isAuthenticated, async (req: AuthRequest, res) => {
     const friendRequestUid = req.body.userId;
@@ -299,42 +370,68 @@ app.post('/send_friend_request', isAuthenticated, async (req: AuthRequest, res) 
     })
 })
 
-// Gets a users incoming and outgoing friend requests
-app.get('friend_requests', isAuthenticated, async (req: AuthRequest, res) => {
-    type friendRequest = {
-        userId: string;
-        username: string;
-        profile_picture_url: string;
-        rowId: string;
-    }
+// Cancels a friend request
+app.post('/cancel_friend_request', isAuthenticated, async (req: AuthRequest, res) => {
+    const rowId = req.body.rowId
 
-    const incomingRequests: friendRequest[] = []
-    const outgoingRequests: friendRequest[] = []
+    // If body doesnt have row id
+    if (!rowId) {
+        res.status(400).json({
+            error: {
+                code: "BAD_REQUEST",
+                message: "The request is missing the following fields: rowId"
+            }
+        })
+    }
 
     // Create a client
     const client = new Client(clientConfig)
     await client.connect()
 
     try {
-        // Get incoming requests
+        // Check if friend request exists
         const result = await client.query(`
             SELECT * FROM friend_requests
-            WHERE fr.incoming = $1::uuid`,
-        [req.userId])
+            WHERE id = $1::uuid;`, 
+        [rowId])
+        if (result.rowCount === 0) {
+            res = returnGenError(res, 404)
+            return
+        }
 
-        result.rows.forEach((row) => {
-            incomingRequests.push({
-                userId: row.outgoing,
-                username: row.username,
-                profile_picture_url: row.pfp,
-                rowId: row.id
+        // Check if friend requests is yours
+        const result2 = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE id = $1::uuid
+            AND outgoing = $2::uuid;`, 
+        [rowId, req.userId])
+        if (result2.rowCount === 0) {
+            res.status(403).json({
+                error: {
+                    code: "FORBIDDEN",
+                    message: "Friend request is not yours."
+                }
             })
-        })
+        }
+
+        // Get friends user id
+        const friendUid = result2.rows[0].incoming
+
+        // Delete friend request row
+        await pool.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+
+        // Send websocket message to remove friend request from list
+        socket.reloadFriendRequests(friendUid)
     } catch (err) {
         throw err;
     } finally {
         await client.end()
     }
+
+    // Return response
+    res.status(200).json({
+        message: "Friend request cancelled."
+    })
 })
 
 // If non of the endpoints above matched

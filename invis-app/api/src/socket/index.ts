@@ -54,4 +54,17 @@ export default class socketHandler {
             }
         }
     }
+
+    // Reloads friend request list
+    reloadFriendRequests(userIdReceiver : UUID): void {
+        // Check if user is online
+        for (const [userId, id] of this.connectedUsers.entries()) {
+            if (userId === userIdReceiver) {
+                this.io.to(id).emit("friend_request_reload", {
+                    placeholder: "placeholder"
+                })
+                break;
+            }
+        }
+    }
 }

@@ -16,7 +16,22 @@ export default function MainLayout() {
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dropdown, setDropdown] = useState(false);
-    const { popupValue, showPopup, popupActive } = useAppContext();
+    const { popupValue, popupActive, popupType, popupIsVisible } = useAppContext();
+
+    const popupStyles: Record<string, { bar: string; text: string }> = {
+        error: {
+            bar: "bg-warning-red",
+            text: "text-warning-red",
+        },
+        success: {
+            bar: "bg-positive-green",
+            text: "text-positive-green",
+        },
+        info: {
+            bar: "bg-text-light",
+            text: "text-text-light",
+        },
+    };
 
     interface NavBarLink {
         to: string;
@@ -149,11 +164,19 @@ export default function MainLayout() {
                     <Outlet />
                 </div>
             </div>
-            {popupActive &&
-                <div className="fixed bottom-0 right-0 p-2 rounded-xl bg-bg-header-button border-black-lighter-border border-2 m-2">
-                    <p>{popupValue}</p>
+            {popupActive && (
+                <div
+                    className={`
+                        fixed bottom-0 right-0 p-2 rounded-xl bg-bg-header-button border-black-lighter-border border-2 m-2 
+                        flex items-center gap-2 sm:max-w-96 max-w-[80%] transform transition-all duration-300 ease-in-out
+                        ${popupIsVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
+                    `}
+                >
+                    <img className="w-8 h-8" src={`/images/${popupType}.svg`} />
+                    <div className={`h-8 w-[1px] opacity-50 ${popupStyles[popupType]?.bar}`} />
+                    <p className={`${popupStyles[popupType]?.text} text-sm`}>{popupValue}</p>
                 </div>
-            }
+            )}
         </div>
     );
 }

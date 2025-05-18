@@ -9,12 +9,19 @@ export default function AddFriendsPage() {
         profile_picture_url: string;
     };
 
+    type friendRequest = {
+        userId: string;
+        username: string;
+        profile_picture_url: string;
+        rowId: string;
+    }
+
     const [searchError, setSearchError] = useState(false)
     const [searchNotFound, setSearchNotFound] = useState("")
     const [searchResult, setSearchResult] = useState([])
 
-    const [incomingRequests, setIncomingRequests] = useState([])
-    const [outgoingRequests, setOutgoingRequests] = useState([])
+    const [incomingRequests, setIncomingRequests] =  useState<friendRequest[]>([])
+    const [outgoingRequests, setOutgoingRequests] = useState<friendRequest[]>([])
 
     const [loading, setLoading] = useState(true);
     const { showPopup } = useAppContext();
@@ -66,13 +73,14 @@ export default function AddFriendsPage() {
         const response_json = await response.json()
 
         if (response.ok) {
-            showPopup("Friend request sent!", 2000)
+            showPopup("Friend request sent!", 3000, "success")
+            loadFriendRequests()
             button.disabled = true;
             button.style.cursor = "not-allowed"
             button.title = "You have already sent a request to this user."
         } else {
             const error = response_json.error.message;
-            showPopup(error, 2000)
+            showPopup(error, 3000, "error")
         }
     }
 
@@ -87,18 +95,37 @@ export default function AddFriendsPage() {
 
         if (response.ok) {
             setLoading(false);
-            if (response_json.found == 1) {
-                setIncomingRequests(response_json.incoming)
-                setOutgoingRequests(response_json.outgoing)
-            } else {
-                setIncomingRequests([])
-                setOutgoingRequests([])
-            }
+            setIncomingRequests(response_json.incoming)
+            setOutgoingRequests(response_json.outgoing)
         } else {
             setLoading(false);
             setIncomingRequests([])
             setOutgoingRequests([])
             console.error(response_json.error)
+        }
+    }
+
+    // Cancels a friend request
+    const cancelFriendRequest = async (rowId: string) => {
+        const response = await fetch(`${apiURL}/cancel_friend_request`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                rowId: rowId
+            }),
+            credentials: "include"
+        })
+
+        const response_json = await response.json()
+
+        if (response.ok) {
+            loadFriendRequests();
+            showPopup("Friend request cancelled.", 3000, "success")
+        } else {
+            const error = response_json.error.message
+            showPopup(error, 3000, "error")
         }
     }
 
@@ -111,7 +138,7 @@ export default function AddFriendsPage() {
     return(
         <div className='w-full h-full sm:flex inline overflow-x-hidden overflow-y-scroll'>
             <div className="sm:w-[60%] w-full sm:h-full sm:max-h-full overflow-x-hidden overflow-y-scroll p-3">
-                <p className="font-medium">Add friends</p>
+                <p className="font-bold">Add friends</p>
                 <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
                 <div className="w-full bg-bg-header-button p-3 rounded-md">
                     <input type="text" 
@@ -140,7 +167,7 @@ export default function AddFriendsPage() {
                 </div>
             </div>
             <div className="sm:w-[40%] w-full sm:h-full sm:max-h-full overflow-x-hidden overflow-y-scroll sm:border-l-2 border-black-lighter-border p-3 flex flex-col">
-                <p className="font-medium">Friend requests</p>
+                <p className="font-bold">Friend requests</p>
                 <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
                 <div className='w-full h-full'>
                     {incomingRequests.length === 0 && outgoingRequests.length === 0
@@ -150,19 +177,36 @@ export default function AddFriendsPage() {
                                 <p className="opacity-50">Tell your friend to send a friend request!</p>
                             </div>
                         </div>
-                    :   <div>
-                            <p className="font-medium">Incoming friend requests</p>
-                            <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
-                            {incomingRequests.length > 0
-                            ? <p>ddlk</p>
-                            : <p>No incoming friend requests</p>
-                            }
-                            <p className="font-medium">Outgoing friend requests</p>
-                            <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
-                            {outgoingRequests.length > 0
-                            ? <p>ddlk</p>
-                            : <p>No outgoing friend requests</p>
-                            }
+                    :   <div className='w-full bg-bg-header-button p-3 rounded-md'>
+                            <div className='mb-5'>
+                                <p className="font-medium opacity-50 font-stretch-expanded">INCOMING FRIEND REQUESTS</p>
+                                <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
+                                {incomingRequests.length > 0
+                                ? <p>ddlk</p>
+                                : <p>No incoming friend requests</p>
+                                }
+                            </div>
+                            <div>
+                                <p className="font-medium opacity-50 font-stretch-expanded">OUTGOING FRIEND REQUESTS</p>
+                                <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
+                                {outgoingRequests.length > 0
+                                ?
+                                <>
+                                {outgoingRequests.map((row: friendRequest) => {
+                                    return <div className='w-full p-2 flex items-center bg-background-black rounded-md gap-1.5 relative'>
+                                        <img className='w-8 h-8 rounded-full border-black-lighter-border border-2' src={row.profile_picture_url} />
+                                        <p className='font-medium'>{row.username}</p>
+                                        <button
+                                            className='w-9 h-9 rounded-full absolute cursor-pointer right-0 m-2 hover:bg-warning-red-transparent bg-[url(/images/x-red.svg)] bg-center bg-no-repeat bg-size-[50%]'
+                                            title='Cancel friend request'
+                                            onClick={() => cancelFriendRequest(row.rowId)}
+                                        ></button>
+                                    </div>
+                                })}
+                                </>
+                                : <p>No outgoing friend requests</p>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
