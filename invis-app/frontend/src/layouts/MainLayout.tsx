@@ -1,9 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAppContext } from '../AppContext';
 import { useEffect, useState} from 'react'
-import { io } from 'socket.io-client'
 const apiURL = import.meta.env.VITE_API_URL;
-const socket = io(apiURL);
 
 export default function MainLayout() {
     type User = {
@@ -16,7 +14,7 @@ export default function MainLayout() {
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dropdown, setDropdown] = useState(false);
-    const { popupValue, popupActive, popupType, popupIsVisible } = useAppContext();
+    const { popupValue, popupActive, popupType, popupIsVisible, socket } = useAppContext();
 
     const popupStyles: Record<string, { bar: string; text: string }> = {
         error: {

@@ -24,7 +24,16 @@ export default function AddFriendsPage() {
     const [outgoingRequests, setOutgoingRequests] = useState<friendRequest[]>([])
 
     const [loading, setLoading] = useState(true);
-    const { showPopup } = useAppContext();
+    const { showPopup, socket } = useAppContext();
+
+    // Handle socket messages
+    socket.on('friend_request', () => {
+        loadFriendRequests()
+    })
+
+    socket.on('friend_request_reload', () => {
+        loadFriendRequests()
+    })
 
     const handleChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const searchQuery = e.target.value;
