@@ -389,6 +389,7 @@ app.post('/cancel_friend_request', isAuthenticated, async (req: AuthRequest, res
     await client.connect()
 
     try {
+        await client.query('BEGIN');
         // Check if friend request exists
         const result = await client.query(`
             SELECT * FROM friend_requests
@@ -418,11 +419,13 @@ app.post('/cancel_friend_request', isAuthenticated, async (req: AuthRequest, res
         const friendUid = result2.rows[0].incoming
 
         // Delete friend request row
-        await pool.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+        await client.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+        await client.query('COMMIT');
 
         // Send websocket message to remove friend request from list
         socket.reloadFriendRequests(friendUid)
     } catch (err) {
+        await client.query('ROLLBACK');
         throw err;
     } finally {
         await client.end()
@@ -453,6 +456,7 @@ app.post('/decline_friend_request', isAuthenticated, async (req: AuthRequest, re
     await client.connect()
 
     try {
+        await client.query('BEGIN');
         // Check if friend request exists
         const result = await client.query(`
             SELECT * FROM friend_requests
@@ -482,11 +486,13 @@ app.post('/decline_friend_request', isAuthenticated, async (req: AuthRequest, re
         const friendUid = result2.rows[0].outgoing
 
         // Delete friend request row
-        await pool.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+        await client.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+        await client.query('COMMIT');
 
         // Send websocket message to remove friend request from list
         socket.reloadFriendRequests(friendUid)
     } catch (err) {
+        await client.query('ROLLBACK');
         throw err;
     } finally {
         await client.end()
@@ -517,6 +523,7 @@ app.post('/accept_friend_request', isAuthenticated, async (req: AuthRequest, res
     await client.connect()
 
     try {
+        await client.query('BEGIN')
         // Check if friend request exists
         const result = await client.query(`
             SELECT * FROM friend_requests
@@ -546,16 +553,18 @@ app.post('/accept_friend_request', isAuthenticated, async (req: AuthRequest, res
         const friendUid = result2.rows[0].outgoing
 
         // Delete friend request row
-        await pool.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+        await client.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
 
         // Insert friend list rows
         const friendRowIds = [crypto.randomUUID(), crypto.randomUUID()]
-        await pool.query(`INSERT INTO friends_list (id, user_id_1, user_id_2) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [friendRowIds[0], req.userId, friendUid])
-        await pool.query(`INSERT INTO friends_list (id, user_id_1, user_id_2) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [friendRowIds[1], friendUid, req.userId])
+        await client.query(`INSERT INTO friends_list (id, user_id_1, user_id_2) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [friendRowIds[0], req.userId, friendUid])
+        await client.query(`INSERT INTO friends_list (id, user_id_1, user_id_2) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [friendRowIds[1], friendUid, req.userId])
+        await client.query('COMMIT')
 
         // Send websocket message to reload friend request list
         socket.reloadFriendRequests(friendUid)
     } catch (err) {
+        await client.query('ROLLBACK')
         throw err;
     } finally {
         await client.end()

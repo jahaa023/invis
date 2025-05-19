@@ -84,7 +84,7 @@ export default function MainLayout() {
 
     return (
         <div className="h-screen flex flex-col">
-            <header className="h-fit w-screen p-3 bg-text-black border-b-2 border-gray-500 flex items-center">
+            <header className="h-fit w-screen p-3 bg-text-black border-b-2 border-black-lighter-border flex items-center">
                 <div className="sm:flex sm:items-center sm:gap-2.5 hidden">
                     {navBarLinks.map((link) => (
                         <NavLink

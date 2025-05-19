@@ -210,7 +210,7 @@ export default function AddFriendsPage() {
                             <div key={row.user_id}>
                                 <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
                                 <div className='flex items-center gap-3 relative hover:bg-bg-black-lighter p-2 rounded-sm'>
-                                    <img className='w-10 h-10 rounded-full border-bg-header-button border-2' src={row.profile_picture_url} alt="" />
+                                    <img className='w-10 h-10 rounded-full border-bg-header-button border-2' src={row.profile_picture_url} />
                                     <p className='text-2xl'>{row.username}</p>
                                     <button
                                         className='w-11 h-11 rounded-full hover:bg-brand-transparent border-none cursor-pointer absolute right-0 mr-3 bg-[url(/images/add-friend-white.svg)] bg-center bg-no-repeat bg-size-[60%]'
