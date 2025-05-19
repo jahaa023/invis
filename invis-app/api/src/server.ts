@@ -434,6 +434,139 @@ app.post('/cancel_friend_request', isAuthenticated, async (req: AuthRequest, res
     })
 })
 
+// Declines a friend request
+app.post('/decline_friend_request', isAuthenticated, async (req: AuthRequest, res) => {
+    const rowId = req.body.rowId
+
+    // If body doesnt have row id
+    if (!rowId) {
+        res.status(400).json({
+            error: {
+                code: "BAD_REQUEST",
+                message: "The request is missing the following fields: rowId"
+            }
+        })
+    }
+
+    // Create a client
+    const client = new Client(clientConfig)
+    await client.connect()
+
+    try {
+        // Check if friend request exists
+        const result = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE id = $1::uuid;`, 
+        [rowId])
+        if (result.rowCount === 0) {
+            res = returnGenError(res, 404)
+            return
+        }
+
+        // Check if friend requests is yours
+        const result2 = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE id = $1::uuid
+            AND incoming = $2::uuid;`, 
+        [rowId, req.userId])
+        if (result2.rowCount === 0) {
+            res.status(403).json({
+                error: {
+                    code: "FORBIDDEN",
+                    message: "Friend request is not yours."
+                }
+            })
+        }
+
+        // Get friends user id
+        const friendUid = result2.rows[0].outgoing
+
+        // Delete friend request row
+        await pool.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+
+        // Send websocket message to remove friend request from list
+        socket.reloadFriendRequests(friendUid)
+    } catch (err) {
+        throw err;
+    } finally {
+        await client.end()
+    }
+
+    // Return response
+    res.status(200).json({
+        message: "Friend request declined."
+    })
+})
+
+// Accepts a friend request
+app.post('/accept_friend_request', isAuthenticated, async (req: AuthRequest, res) => {
+    const rowId = req.body.rowId
+
+    // If body doesnt have row id
+    if (!rowId) {
+        res.status(400).json({
+            error: {
+                code: "BAD_REQUEST",
+                message: "The request is missing the following fields: rowId"
+            }
+        })
+    }
+
+    // Create a client
+    const client = new Client(clientConfig)
+    await client.connect()
+
+    try {
+        // Check if friend request exists
+        const result = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE id = $1::uuid;`, 
+        [rowId])
+        if (result.rowCount === 0) {
+            res = returnGenError(res, 404)
+            return
+        }
+
+        // Check if friend requests is yours
+        const result2 = await client.query(`
+            SELECT * FROM friend_requests
+            WHERE id = $1::uuid
+            AND incoming = $2::uuid;`, 
+        [rowId, req.userId])
+        if (result2.rowCount === 0) {
+            res.status(403).json({
+                error: {
+                    code: "FORBIDDEN",
+                    message: "Friend request is not yours."
+                }
+            })
+        }
+
+        // Get friends user id
+        const friendUid = result2.rows[0].outgoing
+
+        // Delete friend request row
+        await pool.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+
+        // Insert friend list rows
+        const friendRowIds = [crypto.randomUUID(), crypto.randomUUID()]
+        await pool.query(`INSERT INTO friends_list (id, user_id_1, user_id_2) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [friendRowIds[0], req.userId, friendUid])
+        await pool.query(`INSERT INTO friends_list (id, user_id_1, user_id_2) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [friendRowIds[1], friendUid, req.userId])
+
+        // Send websocket message to reload friend request list
+        socket.reloadFriendRequests(friendUid)
+    } catch (err) {
+        throw err;
+    } finally {
+        await client.end()
+    }
+
+    // Return response
+    res.status(201).json({
+        message: "Friend request accepted."
+    })
+})
+
 // If non of the endpoints above matched
 app.all(/(.*)/, (req, res) => {
     res = returnGenError(res, 404)

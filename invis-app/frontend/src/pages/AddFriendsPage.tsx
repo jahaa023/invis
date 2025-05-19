@@ -138,6 +138,54 @@ export default function AddFriendsPage() {
         }
     }
 
+    // Declines a friend request
+    const declineFriendRequest = async (rowId: string) => {
+        const response = await fetch(`${apiURL}/decline_friend_request`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                rowId: rowId
+            }),
+            credentials: "include"
+        })
+
+        const response_json = await response.json()
+
+        if (response.ok) {
+            loadFriendRequests();
+            showPopup("Friend request declined.", 3000, "success")
+        } else {
+            const error = response_json.error.message
+            showPopup(error, 3000, "error")
+        }
+    }
+
+    // Accepts a friend request
+    const acceptFriendRequest = async (rowId: string) => {
+        const response = await fetch(`${apiURL}/accept_friend_request`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                rowId: rowId
+            }),
+            credentials: "include"
+        })
+
+        const response_json = await response.json()
+
+        if (response.ok) {
+            loadFriendRequests();
+            showPopup("Friend request accepted.", 3000, "success")
+        } else {
+            const error = response_json.error.message
+            showPopup(error, 3000, "error")
+        }
+    }
+
     useEffect(()=>{
         loadFriendRequests()
     }, [])
@@ -191,7 +239,27 @@ export default function AddFriendsPage() {
                                 <p className="font-medium opacity-50 font-stretch-expanded">INCOMING FRIEND REQUESTS</p>
                                 <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
                                 {incomingRequests.length > 0
-                                ? <p>ddlk</p>
+                                ? 
+                                <>
+                                {incomingRequests.map((row: friendRequest) => {
+                                    return <div className='w-full p-2 flex items-center bg-background-black rounded-md gap-1.5 relative'>
+                                        <img className='w-8 h-8 rounded-full border-black-lighter-border border-2' src={row.profile_picture_url} />
+                                        <p className='font-medium max-w-[35%] overflow-hidden overflow-ellipsis'>{row.username}</p>
+                                        <div className='absolute right-0 m-2 flex items-center gap-1'>
+                                            <button
+                                                className='w-9 h-9 rounded-full cursor-pointer hover:bg-warning-red-transparent bg-[url(/images/x-red.svg)] bg-center bg-no-repeat bg-size-[50%]'
+                                                title='Decline friend request'
+                                                onClick={() => declineFriendRequest(row.rowId)}
+                                            ></button>
+                                            <button
+                                                className='w-9 h-9 rounded-full cursor-pointer hover:bg-brand-transparent bg-[url(/images/check-brand.svg)] bg-center bg-no-repeat bg-size-[60%]'
+                                                title='Accept friend request'
+                                                onClick={() => acceptFriendRequest(row.rowId)}
+                                            ></button>
+                                        </div>
+                                    </div>
+                                })}
+                                </>
                                 : <p>No incoming friend requests</p>
                                 }
                             </div>
@@ -204,7 +272,7 @@ export default function AddFriendsPage() {
                                 {outgoingRequests.map((row: friendRequest) => {
                                     return <div className='w-full p-2 flex items-center bg-background-black rounded-md gap-1.5 relative'>
                                         <img className='w-8 h-8 rounded-full border-black-lighter-border border-2' src={row.profile_picture_url} />
-                                        <p className='font-medium'>{row.username}</p>
+                                        <p className='font-medium max-w-[50%] overflow-hidden overflow-ellipsis'>{row.username}</p>
                                         <button
                                             className='w-9 h-9 rounded-full absolute cursor-pointer right-0 m-2 hover:bg-warning-red-transparent bg-[url(/images/x-red.svg)] bg-center bg-no-repeat bg-size-[50%]'
                                             title='Cancel friend request'
