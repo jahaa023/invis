@@ -365,6 +365,8 @@ async function startServer() {
                     message: "The request is missing the following fields: rowId"
                 }
             })
+
+            return
         }
 
         // Create a client
@@ -396,6 +398,8 @@ async function startServer() {
                         message: "Friend request is not yours."
                     }
                 })
+
+                return
             }
 
             // Get friends user id
@@ -432,6 +436,8 @@ async function startServer() {
                     message: "The request is missing the following fields: rowId"
                 }
             })
+
+            return
         }
 
         // Create a client
@@ -463,6 +469,8 @@ async function startServer() {
                         message: "Friend request is not yours."
                     }
                 })
+
+                return
             }
 
             // Get friends user id
@@ -499,6 +507,8 @@ async function startServer() {
                     message: "The request is missing the following fields: rowId"
                 }
             })
+
+            return
         }
 
         // Create a client
@@ -530,6 +540,8 @@ async function startServer() {
                         message: "Friend request is not yours."
                     }
                 })
+
+                return
             }
 
             // Get friends user id
@@ -588,8 +600,8 @@ async function startServer() {
             const arrayObject: friendListRow = {
                 userId: row.user_id,
                 username: row.username,
-                profile_picture_url: row.profile_picture,
-                rowId: row.id
+                profile_picture_url: req.protocol + '://' + req.get('host') + '/uploads/' + row.profile_picture,
+                rowId: row.row_id
             }
 
             if (socket.isOnline(row.user_id)) {
@@ -603,6 +615,69 @@ async function startServer() {
         res.status(200).json({
             online: onlineFriends,
             offline: offlineFriends
+        })
+    })
+
+    // Removes a friend from list
+    app.post('/remove_friend', isAuthenticated, async (req: AuthRequest, res) => {
+        const rowId = req.body.rowId
+
+        // If body doesnt have row id
+        if (!rowId) {
+            res.status(400).json({
+                error: {
+                    code: "BAD_REQUEST",
+                    message: "The request is missing the following fields: rowId"
+                }
+            })
+
+            return
+        }
+
+        // Create a client
+        const client = new Client(clientConfig)
+        await client.connect()
+
+        try {
+            await client.query('BEGIN')
+
+            // Check if friend list row includes user
+            const result = await client.query(`
+                SELECT * FROM friends_list
+                WHERE user_id_1 = $1::uuid
+                AND id = $2::uuid;`, 
+            [req.userId, rowId])
+            if (result.rowCount === 0) {
+                res.status(403).json({
+                    error: {
+                        code: "FORBIDDEN",
+                        message: "You are not friends with this user."
+                    }
+                })
+
+                return
+            }
+
+            // Get friends user id
+            const friendUid = result.rows[0].user_id_2
+
+            // Delete friend list rows
+            await client.query(`DELETE FROM friends_list WHERE user_id_1 = $1::uuid AND user_id_2 = $2::uuid;`, [req.userId, friendUid])
+            await client.query(`DELETE FROM friends_list WHERE user_id_1 = $1::uuid AND user_id_2 = $2::uuid;`, [friendUid, req.userId])
+            await client.query('COMMIT')
+
+            // Send websocket message to reload friend request list
+            socket.reloadFriendRequests(friendUid)
+        } catch (err) {
+            await client.query('ROLLBACK')
+            throw err;
+        } finally {
+            await client.end()
+        }
+
+        // Return response
+        res.status(200).json({
+            message: "Friend removed."
         })
     })
 

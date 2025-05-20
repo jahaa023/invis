@@ -14,8 +14,11 @@
   --color-bg-black-lighter: #2D2D2D;
   --color-black-lighter-border: #686868;
   --color-positive-green: #22B700;
-  --color-brand-transparent: #175c76;
-  --color-warning-red-transparent: #512b2b;
+  --color-brand-transparent: rgba(0, 175, 239, 0.3);
+  --color-warning-red-transparent: rgba(212, 57, 57, 0.3);
+  --color-modal-bg: rgba(0, 0, 0, 0.5);
+  --color-white-transparent: rgba(255, 255, 255, 0.3);
+  --color-cancel-grey: rgb(160, 160, 160);
 }
 
 :root {
