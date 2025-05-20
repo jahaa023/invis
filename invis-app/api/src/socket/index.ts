@@ -1,70 +1,96 @@
 import { Server } from "socket.io";
-import { UUID } from 'crypto';
+import { UUID } from "crypto";
+import { pool }  from '../config/db'
 
-// Class for managing websocket
 export default class socketHandler {
     private io: Server;
-    private connectedUsers: Map<string, string>;
+    private connectedUsers: Map<UUID, string>;
 
-    // Connects to socket on init
-    constructor(io: Server) {
-        this.io = io
-        this.connectedUsers = new Map<string, string>();
+    private constructor(io: Server) {
+        this.io = io;
+        this.connectedUsers = new Map<UUID, string>();
 
-        io.on('connection', (socket) => {
-            socket.on('join_online', (userId: UUID) => {
-                // Add user id to connected users
+        io.on("connection", (socket) => {
+            socket.on("join_online", async (userId: UUID) => {
                 this.connectedUsers.set(userId, socket.id);
-            })
 
-            socket.on("disconnect", () => {
-                // Remove user from connectedUsers
+                // Notify friends that this user is online
+                const friends = await this.getFriends(userId);
+                friends.forEach((friendId) => {
+                    const friendSocketId = this.connectedUsers.get(friendId);
+                    if (friendSocketId) {
+                        this.io.to(friendSocketId).emit("friend_status_update", {
+                            friendId: userId,
+                            status: "online",
+                        });
+                    }
+                });
+            });
+
+            socket.on("disconnect", async () => {
+                let disconnectedUserId: UUID | null = null;
+
                 for (const [userId, id] of this.connectedUsers.entries()) {
                     if (id === socket.id) {
+                        disconnectedUserId = userId;
                         this.connectedUsers.delete(userId);
                         break;
                     }
                 }
+
+                if (disconnectedUserId) {
+                    // Notify friends that this user went offline
+                    const friends = await this.getFriends(disconnectedUserId);
+                    friends.forEach((friendId) => {
+                        const friendSocketId = this.connectedUsers.get(friendId);
+                        if (friendSocketId) {
+                            this.io.to(friendSocketId).emit("friend_status_update", {
+                                friendId: disconnectedUserId,
+                                status: "offline",
+                            });
+                        }
+                    });
+                }
             });
+        });
+    }
+
+    static async init(io: Server): Promise<socketHandler> {
+        return new socketHandler(io);
+    }
+
+    // Gets a list of users friends
+    private async getFriends(userId: UUID): Promise<UUID[]> {
+        const friendsList: UUID[] = []
+        const { rows } = await pool.query(`SELECT user_id_2 FROM friends_list WHERE user_id_1 = $1::uuid;`, [userId])
+        rows.forEach((row) => {
+            friendsList.push(row.user_id_2)
         })
+        return friendsList;
     }
 
-    // Returns true if user is online, false otherwise
-    isOnline(userIdCheck : UUID): boolean {
-        let online: boolean = false;
-        for (const [userId, id] of this.connectedUsers.entries()) {
-            if (userId === userIdCheck) {
-                online = true
-                break;
-            }
-        }
-
-        return online
+    // Checks if a user is online
+    isOnline(userIdCheck: UUID): boolean {
+        return this.connectedUsers.has(userIdCheck);
     }
-    
-    // Function to send friend request instantly if user is online
-    sendFriendRequest(userIdIncoming : UUID): void {
-        // Check if user is online
-        for (const [userId, id] of this.connectedUsers.entries()) {
-            if (userId === userIdIncoming) {
-                this.io.to(id).emit("friend_request", {
-                    placeholder: "placeholder"
-                })
-                break;
-            }
+
+    // Updates friend request list to receiver of request
+    sendFriendRequest(userIdIncoming: UUID): void {
+        const socketId = this.connectedUsers.get(userIdIncoming);
+        if (socketId) {
+            this.io.to(socketId).emit("friend_request", {
+                placeholder: "placeholder",
+            });
         }
     }
 
-    // Reloads friend request list
-    reloadFriendRequests(userIdReceiver : UUID): void {
-        // Check if user is online
-        for (const [userId, id] of this.connectedUsers.entries()) {
-            if (userId === userIdReceiver) {
-                this.io.to(id).emit("friend_request_reload", {
-                    placeholder: "placeholder"
-                })
-                break;
-            }
+    // Updates friend request list
+    reloadFriendRequests(userIdReceiver: UUID): void {
+        const socketId = this.connectedUsers.get(userIdReceiver);
+        if (socketId) {
+            this.io.to(socketId).emit("friend_request_reload", {
+                placeholder: "placeholder",
+            });
         }
     }
 }
