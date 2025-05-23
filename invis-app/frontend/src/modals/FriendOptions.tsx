@@ -45,7 +45,7 @@ export default function FriendOptions({
     }
 
     return (
-        <div className="p-4 pr-12 bg-background-black border-2 border-black-lighter-border rounded-md flex flex-col gap-4 min-w-auto md:min-w-xl max-w-[80vw] relative">
+        <div className="p-4 bg-background-black border-2 border-black-lighter-border rounded-md flex flex-col gap-4 min-w-auto md:min-w-xl max-w-[80vw] relative">
             {mainActive && 
             <>
                 <div className="w-full flex items-center gap-3">
@@ -81,7 +81,7 @@ export default function FriendOptions({
             </>
             }
             <button
-            className="w-6 h-6 opacity-50 hover:opacity-100 absolute top-0 right-0 m-2 rounded-full hover:bg-white-transparent cursor-pointer bg-[url(/images/x-white.svg)] bg-center bg-no-repeat bg-size-[60%]"
+            className="w-6 h-6 opacity-50 hover:opacity-100 absolute top-0 right-0 m-1 rounded-full hover:bg-white-transparent cursor-pointer bg-[url(/images/x-white.svg)] bg-center bg-no-repeat bg-size-[60%]"
             title="Close"
             onClick={() => hideModal()}
             ></button>

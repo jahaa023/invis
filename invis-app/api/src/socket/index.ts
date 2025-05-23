@@ -93,4 +93,24 @@ export default class socketHandler {
             });
         }
     }
+
+    // Updates friend list
+    reloadFriendsList(userIdReceiver: UUID): void {
+        const socketId = this.connectedUsers.get(userIdReceiver);
+        if (socketId) {
+            this.io.to(socketId).emit("friends_list_reload", {
+                placeholder: "placeholder",
+            });
+        }
+    }
+
+    // Tells a client to update everything in the navbar, like notif bubbles and profile picture
+    updateNavBar(userIdReceiver: UUID): void {
+        const socketId = this.connectedUsers.get(userIdReceiver);
+        if (socketId) {
+            this.io.to(socketId).emit("update_navbar", {
+                placeholder: "placeholder",
+            });
+        }
+    }
 }

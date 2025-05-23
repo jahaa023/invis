@@ -34,26 +34,62 @@ export default function MainLayout() {
     interface NavBarLink {
         to: string;
         title: string;
+        notifBubble?: number;
     }
 
-    const navBarLinks: NavBarLink[] = [
-        {
-            to : "/chats",
-            title: "Chats"
-        },
-        {
-            to : "/friends_list",
-            title: "Friends List"
-        },
-        {
-            to : "/add_friends",
-            title : "Add friends"
-        },
-        {
-            to : "/settings",
-            title: "Settings"
+    const [navBarLinks, setNavBarLinks] = useState<NavBarLink[]>([])
+
+    // Loads in user info
+    const loadUserInfo = () => {
+        fetch(`${apiURL}/user_info`, {
+            method: "GET",
+            credentials: "include"
+        })
+
+        .then(response => response.json())
+
+        .then(response => {
+            setUserInfo(response.data)
+        })
+
+        .catch(error => {
+            console.error(error)
+        })
+    }
+
+    // Updates notification bubbles
+    const updateNotifBubbles = async () => {
+        const response = await fetch(`${apiURL}/notifications`, {
+            method: "GET",
+            credentials: "include"
+        })
+
+        const response_json = await response.json()
+
+        if (response.ok) {
+            setNavBarLinks([
+                {
+                    to : "/chats",
+                    title: "Chats"
+                },
+                {
+                    to : "/friends_list",
+                    title: "Friends List",
+                },
+                {
+                    to : "/add_friends",
+                    title : "Add friends",
+                    notifBubble: response_json.data.friend_requests
+                },
+                {
+                    to : "/settings",
+                    title: "Settings"
+                }
+            ])
+        } else {
+            console.error(response_json.error.message)
         }
-    ]
+    }
 
     // Gets info about logged in user from backend and connects to websocket
     let socketConnected = false;
@@ -78,7 +114,15 @@ export default function MainLayout() {
             console.error(error)
             setLoading(false);
         })
+
+        updateNotifBubbles()
     }, [])
+
+    // Handle socket messages
+    socket.on('update_navbar', () => {
+        loadUserInfo()
+        updateNotifBubbles()
+    })
 
     if (loading) return <p>Loading...</p>;
 
@@ -91,11 +135,16 @@ export default function MainLayout() {
                             to={link.to}
                             className={({ isActive }) =>
                                 isActive
-                                    ? "px-3 py-1.5 font-medium rounded-md cursor-pointer bg-white !text-text-black !no-underline"
-                                    : "px-3 py-1.5 font-medium !text-text-light rounded-md bg-bg-header-button cursor-pointer hover:bg-bg-header-button-hover hover:text-text-black !no-underline"
+                                    ? "px-3 flex items-center py-1.5 font-medium rounded-md cursor-pointer bg-white !text-text-black !no-underline"
+                                    : "px-3 flex items-center py-1.5 font-medium !text-text-light rounded-md bg-bg-header-button cursor-pointer hover:bg-bg-header-button-hover hover:text-text-black !no-underline"
                             }
                         >
                             {link.title}
+                            {link.notifBubble && link.notifBubble > 0 &&
+                                <div className="w-5 h-5 rounded-full ml-1.5 flex justify-center items-center text-center bg-red-600">
+                                    <span className="m-0 text-sm text-text-light">{link.notifBubble}</span>
+                                </div>
+                            }
                         </NavLink>
                     ))}
                 </div>

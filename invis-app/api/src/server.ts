@@ -16,6 +16,7 @@ import path from 'path';
 import { Server } from "socket.io";
 import socketHandler from "./socket/index"
 import { pool, clientConfig } from './config/db'
+import { console } from 'inspector';
 
 // Define consts and setup
 dotenv.config();
@@ -24,6 +25,7 @@ const frontendURL = process.env.FRONTEND_URL
 const authURL = process.env.AUTH_URL
 
 const { createServer } = require('node:http')
+const fs = require('fs');
 const app = express();
 const server = createServer(app)
 
@@ -44,9 +46,9 @@ app.use(cors({
 
 // Configure multer
 const storage = multer.diskStorage({
-    destination: './uploads/', // folder to save uploaded files
+    destination: './src/uploads/', // folder to save uploaded files
         filename: (req, file, cb) => {
-            cb(null, Date.now() + '-' + file.originalname);
+            cb(null, String(Date.now()) + ".jpg");
     }
 });
 const upload = multer({ storage });
@@ -142,12 +144,6 @@ async function startServer() {
             }
         })
     })
-
-    // Route to upload profile picture
-    app.post('/upload_profilepic', isAuthenticated, upload.single('file'), (req: AuthRequest, res) => {
-        console.log('File received:', req.file);
-        res.json({ message: 'File uploaded successfully' });
-    });
 
     // Route to search for users to add friend
     app.post('/friend_search', isAuthenticated, async (req: AuthRequest, res) => {
@@ -346,6 +342,7 @@ async function startServer() {
 
         // Send friend request in websocket as well
         socket.sendFriendRequest(friendRequestUid)
+        socket.updateNavBar(friendRequestUid)
 
         // Return response
         res.status(201).json({
@@ -409,8 +406,9 @@ async function startServer() {
             await client.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
             await client.query('COMMIT');
 
-            // Send websocket message to remove friend request from list
+            // Send websocket message to remove friend request from list and remove bubble from navbar
             socket.reloadFriendRequests(friendUid)
+            socket.updateNavBar(friendUid)
         } catch (err) {
             await client.query('ROLLBACK');
             throw err;
@@ -482,6 +480,9 @@ async function startServer() {
 
             // Send websocket message to remove friend request from list
             socket.reloadFriendRequests(friendUid)
+            if (req.userId) {
+                socket.updateNavBar(req.userId)
+            }
         } catch (err) {
             await client.query('ROLLBACK');
             throw err;
@@ -558,6 +559,9 @@ async function startServer() {
 
             // Send websocket message to reload friend request list
             socket.reloadFriendRequests(friendUid)
+            if (req.userId) {
+                socket.updateNavBar(req.userId)
+            }
         } catch (err) {
             await client.query('ROLLBACK')
             throw err;
@@ -666,8 +670,8 @@ async function startServer() {
             await client.query(`DELETE FROM friends_list WHERE user_id_1 = $1::uuid AND user_id_2 = $2::uuid;`, [friendUid, req.userId])
             await client.query('COMMIT')
 
-            // Send websocket message to reload friend request list
-            socket.reloadFriendRequests(friendUid)
+            // Send websocket message to reload friend list
+            socket.reloadFriendsList(friendUid)
         } catch (err) {
             await client.query('ROLLBACK')
             throw err;
@@ -678,6 +682,82 @@ async function startServer() {
         // Return response
         res.status(200).json({
             message: "Friend removed."
+        })
+    })
+
+    // Endpoint for uploading cropped profile picture
+    app.post('/upload_profile_pic', upload.single('file'), isAuthenticated, async (req: AuthRequest, res) => {
+        // If there is no file in the request
+        if (!req.file) {
+            res.status(400).json({
+                error: {
+                    code: "BAD_REQUEST",
+                    message: "The request is missing a file."
+                }
+            })
+            return
+        }
+
+        // Create a client
+        const client = new Client(clientConfig)
+        await client.connect()
+
+        // Insert file name into database
+        try {
+            await client.query('BEGIN')
+
+            // Get users current profile picture
+            const result = await client.query(`SELECT profile_picture FROM users WHERE id = $1::uuid;`, [ req.userId ])
+            if (result.rows[0].profile_picture != "defaultprofile.jpg") {
+                // Delete previous profile picture if it isnt the default
+                const filePath = `./src/uploads/${result.rows[0].profile_picture}`;
+                if (fs.existsSync(filePath)) {
+                    fs.unlink(filePath, (err : any) => {
+                        if (err) {
+                            console.error(err);
+                            res = returnGenError(res, 500)
+                            return
+                        }
+                    });
+                }
+            }
+
+            // Insert new profile pic name into database
+            await client.query(`UPDATE users SET profile_picture = $1::text WHERE id = $2::uuid;`, [req.file.filename, req.userId])
+            await client.query('COMMIT')
+
+            // Tell user to update navbar
+            if (req.userId) {
+                socket.updateNavBar(req.userId)
+            }
+        } catch (err) {
+            await client.query('ROLLBACK')
+            throw err;
+        } finally {
+            await client.end()
+        }
+
+        // Return response
+        res.status(201).json({
+            message: "Profile picture updated."
+        })
+    })
+
+    // Get numbers of notifications for pending friends (and chats later on)
+    app.get('/notifications', isAuthenticated, async (req: AuthRequest, res) => {
+        // Get count of rows
+        const { rows } = await pool.query(`
+            SELECT COUNT(incoming) AS count
+            FROM friend_requests
+            WHERE incoming = $1::uuid;`, 
+        [req.userId])
+
+        // Return response
+        res.status(200).json({
+            message: "Notifications fetched successfully.",
+            data: {
+                friend_requests: rows[0].count
+            }
         })
     })
 

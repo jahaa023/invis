@@ -45,6 +45,10 @@ export default function FriendsListPage() {
         loadFriendsList()
     })
 
+    socket.on('friends_list_reload', () => {
+        loadFriendsList()
+    })
+
     useEffect(()=>{
         loadFriendsList()
     }, [])
