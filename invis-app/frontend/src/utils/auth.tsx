@@ -5,7 +5,7 @@ export const checkSession = async (): Promise<boolean> => {
     // Check if user is logged in
     const response = await fetch(`${authURL}/validate-session`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
     });
 
     if (response.status != 200) {

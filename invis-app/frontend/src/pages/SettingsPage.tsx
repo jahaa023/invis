@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 const apiURL = import.meta.env.VITE_API_URL;
-import UploadProfilePic from '../modals/UploadProfilePic';
-import { useModal } from '../ModalContext';
-import { useAppContext } from '../AppContext';
+import UploadProfilePic from "../modals/UploadProfilePic";
+import { useModal } from "../ModalContext";
+import { useAppContext } from "../AppContext";
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
@@ -20,26 +20,26 @@ export default function SettingsPage() {
     const loadSettings = async () => {
         const response = await fetch(`${apiURL}/user_info`, {
             method: "GET",
-            credentials: "include"
-        })
+            credentials: "include",
+        });
 
-        const response_json = await response.json()
+        const response_json = await response.json();
 
         if (response.ok) {
-            setLoading(false)
-            setUserInfo(response_json.data)
+            setLoading(false);
+            setUserInfo(response_json.data);
         } else {
-            setLoading(false)
-            console.error(response_json.error)
+            setLoading(false);
+            console.error(response_json.error);
         }
-    }
+    };
 
     const { showModal } = useModal();
 
-    useEffect(()=>{
-        loadSettings()
-    }, [])
-    
+    useEffect(() => {
+        loadSettings();
+    }, []);
+
     if (loading) return <p>Loading...</p>;
 
     return (
@@ -48,13 +48,22 @@ export default function SettingsPage() {
             <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
             <div className="w-full p-4 bg-bg-header-button rounded-md flex items-center gap-3">
                 <img
-                className="w-13 h-13 rounded-full hover:brightness-50 cursor-pointer"
-                src={userInfo?.profile_picture_url}
-                title="Change profile picture"
-                onClick={() => showModal(<UploadProfilePic showPopup={showPopup} loadSettings={loadSettings} />)}
+                    className="w-13 h-13 rounded-full hover:brightness-50 cursor-pointer"
+                    src={userInfo?.profile_picture_url}
+                    title="Change profile picture"
+                    onClick={() =>
+                        showModal(
+                            <UploadProfilePic
+                                showPopup={showPopup}
+                                loadSettings={loadSettings}
+                            />
+                        )
+                    }
                 />
-                <h1 className="max-w-[80%] overflow-hidden overflow-ellipsis text-3xl font-medium" >{userInfo?.username}</h1>
+                <h1 className="max-w-[80%] overflow-hidden overflow-ellipsis text-3xl font-medium">
+                    {userInfo?.username}
+                </h1>
             </div>
         </div>
-    )
+    );
 }

@@ -4,12 +4,11 @@ export default function Footer() {
             <div className="max-w-[80%] flex gap-4">
                 <div>
                     <p>Contact:</p>
-                    
                 </div>
                 <div>
                     <p>Links:</p>
                 </div>
             </div>
         </div>
-    )
+    );
 }

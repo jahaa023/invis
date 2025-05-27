@@ -1,7 +1,7 @@
 // Redirects if user is not authenticated
-import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { checkSession } from '../utils/auth';
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { checkSession } from "../utils/auth";
 
 type Props = {
     children: React.ReactNode;
@@ -9,7 +9,9 @@ type Props = {
 
 const AuthRoute = ({ children }: Props) => {
     const [authChecked, setAuthChecked] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
+        null
+    );
 
     useEffect(() => {
         const validate = async () => {
