@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 
 const authURL = import.meta.env.VITE_AUTH_URL;
 
@@ -12,6 +13,9 @@ export default function LoginPage() {
     // Define states
     const [error, setError] = useState("")
     const [formData, setFormData] = useState<FormData>({ username: '', password: '' });
+
+    // State for password visibilty button, true = password, false = text
+    const [visibilty, setVisibility] = useState(true)
 
     // Updates formdata on input
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -67,15 +71,22 @@ export default function LoginPage() {
                 min={5}
                 max={20}
                 />
-                <input 
-                type="password"
-                placeholder="Password"
-                className="p-2 w-[calc(100%-0.5rem)] border-1 border-text-light rounded-md font-light"
-                onChange={handleChange}
-                required
-                name='password'
-                min={8}
-                />
+                <div className='flex items-center w-[calc(100%-0.5rem)] h-10 border-1 border-text-light rounded-md font-light relative'>
+                    <input
+                    type={visibilty ? "password" : "text"}
+                    className='h-full p-2 w-full absolute pr-10 rounded-md font-light'
+                    placeholder='Password'
+                    onChange={handleChange}
+                    required
+                    name='password'
+                    min={8}
+                    />
+                    <button
+                    className='opacity-50 hover:opacity-100 absolute right-0 w-10 h-10 rounded-br-md rounded-tr-md cursor-pointer flex justify-center items-center'
+                    type='button'
+                    onClick={visibilty ? () => setVisibility(false) : () => setVisibility(true)}
+                    >{visibilty ? <MdVisibility className='w-[60%] h-[60%]' /> : <MdVisibilityOff className='w-[60%] h-[60%]' />}</button>
+                </div>
                 <button
                     type='submit'
                     className="px-2 w-[calc(100%-0.5rem)] py-1.5 rounded-[8px] cursor-pointer bg-[radial-gradient(circle_at_center,_#0000_20.55%,_var(--color-brand)_94.17%)] bg-brand transition-all duration-200 ease-in hover:bg-brand-alt hover:font-bold"

@@ -41,6 +41,35 @@ export default function FriendsListPage() {
         }
     }
 
+    // Creates or redirects to a chat
+    const chatButtonHandler = async (userId : string) => {
+        const response = await fetch(`${apiURL}/get_chat`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId : userId
+            }),
+            credentials: "include"
+        })
+
+        const response_json = await response.json()
+
+        if (response.ok) {
+            if (response_json.chat_exists) {
+                const chat_id = response_json.chat_id
+                window.location.href = `/chats/${chat_id}`
+                return
+            } else {
+                // Show modal to send request
+            }
+        } else {
+            const error = response_json.error.message
+            showPopup(error, 3000, "error")
+        }
+    }
+
     socket.on('friend_status_update', () => {
         loadFriendsList()
     })
@@ -71,6 +100,7 @@ export default function FriendsListPage() {
                             <button
                                 className='w-6 h-6 cursor-pointer opacity-50 hover:opacity-100 bg-[url(/images/chat-white.svg)] bg-center bg-no-repeat bg-cover'
                                 title={`Send ${row.username} a message.`}
+                                onClick={() => chatButtonHandler(row.userId)}
                             ></button>
                             <button
                                 className='w-6 h-6 cursor-pointer opacity-50 hover:opacity-100 bg-[url(/images/dots-3-white.svg)] bg-center bg-no-repeat'

@@ -5,7 +5,37 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(20) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     profile_picture varchar(255) DEFAULT 'defaultprofile.jpg' NOT NULL,
+    encryption_key_salt TEXT NOT NULL,
     CONSTRAINT users_username_key UNIQUE (username)
+);
+
+CREATE TABLE IF NOT EXISTS private_keys (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+    key TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public_keys (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+    key TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS chats (
+    id UUID PRIMARY KEY,
+    type NOT NULL varchar(128), -- dm, dm_temp or group
+    name varchar(32),
+    cover_image varchar(255) DEFAULT 'defaultgroupchat.jpg'
+);
+
+CREATE TABLE IF NOT EXISTS chat_members (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+    last_accessed int DEFAULT 0,
+    joined int DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -31,32 +61,15 @@ CREATE TABLE IF NOT EXISTS friends_list (
 CREATE TABLE IF NOT EXISTS friend_requests (
     id UUID NOT NULL PRIMARY KEY,
     outgoing UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    incoming UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE chats (
-    id UUID NOT NULL PRIMARY KEY,
-    table_name UUID NOT NULL,
-    chat_name varchar(255) DEFAULT "New Chat"
-);
-
-CREATE TABLE chat_members (
-    id UUID NOT NULL PRIMARY KEY,
-    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    last_accessed int NOT NULL -- Unix timestamp
-);
-
-CREATE TABLE message_embed (
-    id UUID NOT NULL PRIMARY KEY,
-    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    message_id UUID NOT NULL,
-    embed TEXT NOT NULL,
-)
-
-CREATE TABLE public_keys (
-    id UUID NOT NULL PRIMARY KEY,
-    key TEXT NOT NULL,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    incoming UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS groupchat_requests (
+    id UUID NOT NULL PRIMARY KEY,
+    outgoing UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    incoming UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE
+);
+
+CREATE DATABASE invis_messages;

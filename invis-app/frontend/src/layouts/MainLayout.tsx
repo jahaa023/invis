@@ -165,11 +165,16 @@ export default function MainLayout() {
                                         onClick={() => setDropdown(false)}
                                         className={({ isActive }) =>
                                             isActive
-                                                ? "px-3 py-1.5 font-medium rounded-md cursor-pointer bg-white !text-text-black !no-underline"
-                                                : "px-3 py-1.5 font-medium !text-text-light rounded-md bg-bg-header-button cursor-pointer hover:bg-bg-header-button-hover hover:text-text-black !no-underline"
+                                                ? "px-3 py-1.5 flex items-center font-medium rounded-md cursor-pointer bg-white !text-text-black !no-underline"
+                                                : "px-3 py-1.5 flex items-center font-medium !text-text-light rounded-md bg-bg-header-button cursor-pointer hover:bg-bg-header-button-hover hover:text-text-black !no-underline"
                                         }
                                     >
                                         {link.title}
+                                        {link.notifBubble && link.notifBubble > 0 &&
+                                            <div className="w-5 h-5 rounded-full ml-1.5 flex justify-center items-center text-center bg-red-600">
+                                                <span className="m-0 text-sm text-text-light">{link.notifBubble}</span>
+                                            </div>
+                                        }
                                     </NavLink>
                                 </>
                             ))}

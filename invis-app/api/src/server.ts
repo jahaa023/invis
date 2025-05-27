@@ -761,6 +761,51 @@ async function startServer() {
         })
     })
 
+    // Check if a chat exists and return chat id
+    app.post('/get_chat', isAuthenticated, async (req: AuthRequest, res) => {
+        // Get friends user id
+        const friendUserId = req.body.userId
+        if (!friendUserId) {
+            res.status(400).json({
+                error: {
+                    code: "BAD_REQUEST",
+                    message: "The request is missing friends user id."
+                }
+            })
+            return
+        }
+
+        // Create a client
+        const client = new Client(clientConfig)
+        await client.connect()
+
+        try {
+            await client.query('BEGIN')
+
+            // Check if user is in friends list
+            const result = await client.query(`
+                SELECT * FROM friends_list
+                WHERE user_id_1 = $1::uuid
+                AND user_id_2 = $2::uuid;`, 
+            [req.userId, friendUserId])
+
+            if (result.rowCount === 0) {
+                res.status(403).json({
+                    error: {
+                        code: "FORBIDDEN",
+                        message: "This user is not in your friends list."
+                    }
+                })
+                return
+            }
+        } catch (err) {
+            await client.query('ROLLBACK')
+            throw err;
+        } finally {
+            await client.end()
+        }
+    })
+
     // If non of the endpoints above matched
     app.all(/(.*)/, (req, res) => {
         res = returnGenError(res, 404)

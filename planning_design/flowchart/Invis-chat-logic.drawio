@@ -1,0 +1,130 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0" version="27.0.2">
+  <diagram name="Page-1" id="y6FRvSX6N-tpvK5mPAyo">
+    <mxGraphModel dx="2605" dy="1408" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-2" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Creating a chat&lt;/h1&gt;&lt;p&gt;When the chat bubble next to a friends username is clicked&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-3" target="lhb7IGkhlTZPuF0P23zp-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-3" value="When chat icon is clicked" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-4" target="lhb7IGkhlTZPuF0P23zp-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-4" value="Post friends user id to the server" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="260" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-6" target="lhb7IGkhlTZPuF0P23zp-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-6" target="lhb7IGkhlTZPuF0P23zp-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-6" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Is this user in your friends list?&lt;/font&gt;" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="390" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-8" value="Return error 403: This user is not in your friends list" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-10" value="No" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="430" y="400" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-18" target="lhb7IGkhlTZPuF0P23zp-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-18" value="Query the chats table and check if a chat between you and this friend exists and type = &quot;dm&quot;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="560" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-20" target="lhb7IGkhlTZPuF0P23zp-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-20" target="lhb7IGkhlTZPuF0P23zp-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-20" value="Does a chat exist?" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="690" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-22" value="Redirect to /chats on that chat" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="700" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-24" value="Yes" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="430" y="700" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-36" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-25" target="lhb7IGkhlTZPuF0P23zp-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-25" value="Create a table with a random uuid as the name to act as the chat into invis-chats database" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="325" y="860" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-27" value="No" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="395" y="800" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-28" value="Random UUID" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="880" width="140" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-29" value="user_id (person who sent chat)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-28">
+          <mxGeometry y="30" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-30" value="message (json, with encrypted for user id 1 and 2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-28">
+          <mxGeometry y="60" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-31" value="timestamp (json, with encrypted for user id 1 and 2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-28">
+          <mxGeometry y="110" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-32" value="id (uuid)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-28">
+          <mxGeometry y="160" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-33" value="edited (boolean)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-28">
+          <mxGeometry y="190" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-45" value="reply (null or message id)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-28">
+          <mxGeometry y="220" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-34" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="310" y="900" as="sourcePoint" />
+            <mxPoint x="200" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-44" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-35" target="lhb7IGkhlTZPuF0P23zp-43">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-35" value="Insert uuid table name into chats table and add members" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1015" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-37" value="&lt;div&gt;chats&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="1015" width="140" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-38" value="id (uuid)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-37">
+          <mxGeometry y="30" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-40" value="chat_id (uuid table name)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-37">
+          <mxGeometry y="60" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-41" value="user_id (uuid)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="lhb7IGkhlTZPuF0P23zp-37">
+          <mxGeometry y="90" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-42" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="475" y="1040" as="sourcePoint" />
+            <mxPoint x="550" y="1040" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-47" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="lhb7IGkhlTZPuF0P23zp-43" target="lhb7IGkhlTZPuF0P23zp-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-43" value="Reload chats list on frontend and redirect to created chat" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1155" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lhb7IGkhlTZPuF0P23zp-46" value="Send WebSocket message to friend to do the same" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1295" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
