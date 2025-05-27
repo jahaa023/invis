@@ -9,6 +9,13 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT users_username_key UNIQUE (username)
 );
 
+CREATE TABLE IF NOT EXISTS chats (
+    id UUID PRIMARY KEY,
+    type varchar(128) NOT NULL, -- dm, dm_temp or group
+    name varchar(32),
+    cover_image varchar(255) DEFAULT 'defaultgroupchat.jpg'
+);
+
 CREATE TABLE IF NOT EXISTS private_keys (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -21,13 +28,6 @@ CREATE TABLE IF NOT EXISTS public_keys (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
     key TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS chats (
-    id UUID PRIMARY KEY,
-    type NOT NULL varchar(128), -- dm, dm_temp or group
-    name varchar(32),
-    cover_image varchar(255) DEFAULT 'defaultgroupchat.jpg'
 );
 
 CREATE TABLE IF NOT EXISTS chat_members (

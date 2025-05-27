@@ -202,14 +202,17 @@ app.post('/register', registerValidator(), async (req: Request, res: Response) =
     const user_id = crypto.randomUUID();
     const hashed_password = await argon2.hash(password);
 
+    // Create an encryption key salt
+    const encryption_key_salt = crypto.randomBytes(16).toString('hex')
+
     // Insert info into database
     try {
         await db.query(
             `
-                INSERT INTO users (id, username, password)
-                VALUES ($1::uuid, $2::text, $3::text)
+                INSERT INTO users (id, username, password, encryption_key_salt)
+                VALUES ($1::uuid, $2::text, $3::text, $4::text)
             `,
-            [user_id, username, hashed_password],
+            [user_id, username, hashed_password, encryption_key_salt],
         );
 
         // Create a session token
@@ -228,7 +231,11 @@ app.post('/register', registerValidator(), async (req: Request, res: Response) =
 
         res.status(201).json({
             message: 'User registered successfully!',
-            data: { user: { user_id, username } },
+            data: {
+                user_id : user_id,
+                username: username,
+                encryption_key_salt: encryption_key_salt
+            },
         });
     } catch (err: any) {
         // If username is taken
@@ -266,7 +273,7 @@ app.post('/login', async (req, res) => {
     // Get hashed password from database
     try {
         const { rows } = await db.query(
-            'SELECT id, password FROM users WHERE username = $1::text',
+            'SELECT id, password, encryption_key_salt FROM users WHERE username = $1::text',
             [username],
         );
 
@@ -312,10 +319,16 @@ app.post('/login', async (req, res) => {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Origin', frontendUrl);
 
+        // Get encryption key salt
+        const encryption_key_salt = user.encryption_key_salt
+
         // Return status
         res.status(200).json({
             code: "SUCCESS",
             message: 'Logged in successfully!',
+            data: {
+                encryption_key_salt: encryption_key_salt
+            }
         });
     } catch (err) {
         throw err;
