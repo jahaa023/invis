@@ -1,5 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import deriveEncryptionKey from "../utils/DeriveEncryptionKey";
+import { useKeyContext } from '../KeyContext';
+import { useNavigate } from 'react-router-dom';
 
 const authURL = import.meta.env.VITE_AUTH_URL;
 
@@ -12,6 +15,8 @@ interface FormData {
 export default function LoginPage() {
     // Define states
     const [error, setError] = useState("");
+    const { setKey } = useKeyContext();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<FormData>({
         username: "",
         password: "",
@@ -43,7 +48,16 @@ export default function LoginPage() {
             const res_json = await response.json();
 
             if (response.ok) {
-                window.location.href = "/chats";
+                try {
+                    const password = formData.password;
+                    const salt = res_json.data.encryption_key_salt;
+                    const key = await deriveEncryptionKey(password, salt);
+                    setKey(key)
+                    navigate("/chats")
+                } catch (err) {
+                    setError("Something went wrong.")
+                    console.error(err)
+                }
             } else {
                 const error = res_json.error.message;
                 setError(error);

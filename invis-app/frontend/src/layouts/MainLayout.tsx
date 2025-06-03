@@ -1,9 +1,18 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAppContext } from "../AppContext";
 import { useEffect, useState } from "react";
+import { useKeyContext } from '../KeyContext';
 const apiURL = import.meta.env.VITE_API_URL;
 
 export default function MainLayout() {
+    // If derived encryption and decryption key is not present
+    const { key } = useKeyContext();
+    if (!key) {
+        console.log("Key not found. Log in again to retrieve.")
+        //window.location.href = "/login"
+    }
+
+    // Define type for user info to be displayed
     type User = {
         user_id: string;
         username: string;
@@ -11,12 +20,14 @@ export default function MainLayout() {
         profile_picture_url: string;
     };
 
+    // Define states
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dropdown, setDropdown] = useState(false);
     const { popupValue, popupActive, popupType, popupIsVisible, socket } =
         useAppContext();
 
+    // Diffrent styles for popup
     const popupStyles: Record<string, { bar: string; text: string }> = {
         error: {
             bar: "bg-warning-red",
@@ -32,12 +43,14 @@ export default function MainLayout() {
         },
     };
 
+    // Define type for a link in the navbar
     interface NavBarLink {
         to: string;
         title: string;
         notifBubble?: number;
     }
 
+    // Define a state for the navbar links
     const [navBarLinks, setNavBarLinks] = useState<NavBarLink[]>([]);
 
     // Loads in user info
