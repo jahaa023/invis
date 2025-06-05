@@ -53,6 +53,17 @@ export default function LoginPage() {
                     const salt = res_json.data.encryption_key_salt;
                     const key = await deriveEncryptionKey(password, salt);
                     setKey(key)
+
+                    // If localstorage encryption key doesnt match, delete it
+                    const localKey = localStorage.getItem("encryptionKey")
+                    if (localKey) {
+                        const rawKey = await crypto.subtle.exportKey('raw', key);
+                        const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(rawKey)));
+                        
+                        if (localKey != keyBase64) {
+                            localStorage.removeItem("encryptionKey")
+                        }
+                    }
                     navigate("/chats")
                 } catch (err) {
                     setError("Something went wrong.")

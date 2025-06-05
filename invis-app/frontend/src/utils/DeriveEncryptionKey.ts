@@ -8,7 +8,7 @@ export default async function deriveEncryptionKey(password: string, saltHex: str
         { name: "PBKDF2", salt, iterations: 100_000, hash: "SHA-256" },
         baseKey,
         { name: "AES-GCM", length: 256 },
-        false,
+        true,
         ["encrypt", "decrypt"]
     );
     return key;

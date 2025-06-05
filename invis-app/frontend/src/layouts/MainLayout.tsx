@@ -5,13 +5,6 @@ import { useKeyContext } from '../KeyContext';
 const apiURL = import.meta.env.VITE_API_URL;
 
 export default function MainLayout() {
-    // If derived encryption and decryption key is not present
-    const { key } = useKeyContext();
-    if (!key) {
-        console.log("Key not found. Log in again to retrieve.")
-        //window.location.href = "/login"
-    }
-
     // Define type for user info to be displayed
     type User = {
         user_id: string;
@@ -20,8 +13,9 @@ export default function MainLayout() {
         profile_picture_url: string;
     };
 
-    // Define states
+    // Define states and context
     const [userInfo, setUserInfo] = useState<User | null>(null);
+    const { key, setKey } = useKeyContext();
     const [loading, setLoading] = useState(true);
     const [dropdown, setDropdown] = useState(false);
     const { popupValue, popupActive, popupType, popupIsVisible, socket } =
@@ -52,6 +46,27 @@ export default function MainLayout() {
 
     // Define a state for the navbar links
     const [navBarLinks, setNavBarLinks] = useState<NavBarLink[]>([]);
+
+    // Checks if derived encryption and decryption key is not present
+    const checkKey = async () => {
+        if (!key) {
+            // Check if key is in localstorage
+            const keyBase64 = localStorage.getItem('encryptionKey');
+            if (keyBase64) {
+                const rawKey = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
+                const localKey = await crypto.subtle.importKey(
+                    'raw',
+                    rawKey,
+                    { name: 'AES-GCM' },
+                    true,
+                    ['encrypt', 'decrypt']
+                );
+                setKey(localKey)
+            } else {
+                window.location.href = "/login"
+            }
+        }
+    }
 
     // Loads in user info
     const loadUserInfo = () => {
@@ -128,6 +143,7 @@ export default function MainLayout() {
             });
 
         updateNotifBubbles();
+        checkKey()
     }, []);
 
     // Handle socket messages
