@@ -1,5 +1,6 @@
 import { useState, useEffect} from "react";
 const apiURL = import.meta.env.VITE_API_URL;
+const authURL = import.meta.env.VITE_AUTH_URL;
 import UploadProfilePic from "../modals/UploadProfilePic";
 import { useModal } from "../ModalContext";
 import { useAppContext } from "../AppContext";
@@ -11,6 +12,7 @@ import { useKeyContext } from '../KeyContext';
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
 
+    // Define type for profile display
     type User = {
         user_id: string;
         username: string;
@@ -18,11 +20,14 @@ export default function SettingsPage() {
         profile_picture_url: string;
     };
 
+    // Define states and context
     const [userInfo, setUserInfo] = useState<User | null>(null);
     const [localStorageChecked, setLocalStorageChecked] = useState(false)
     const { showPopup } = useAppContext();
     const { key } = useKeyContext();
+    const { showModal } = useModal();
 
+    // Gets user info from api and renders it
     const loadSettings = async () => {
         const response = await fetch(`${apiURL}/user_info`, {
             method: "GET",
@@ -40,6 +45,7 @@ export default function SettingsPage() {
         }
     };
 
+    // Triggers when toggling saving key to localstorage
     const handleLocalStorageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
             // Save key to localstorage
@@ -48,6 +54,7 @@ export default function SettingsPage() {
                 return
             }
 
+            // Export key to base 64 and store as string
             const rawKey = await crypto.subtle.exportKey('raw', key);
             const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(rawKey)));
             localStorage.setItem('encryptionKey', keyBase64);
@@ -62,8 +69,19 @@ export default function SettingsPage() {
         }
     }
 
-    const { showModal } = useModal();
+    // Function to log out
+    const logout = async () => {
+        fetch(`${authURL}/logout`, {
+            method: "GET",
+            credentials: "include"
+        })
 
+        .finally(() => {
+            window.location.href = "/login"
+        })
+    }
+
+    // Effect to run functions when page is starting
     useEffect(() => {
         loadSettings();
         if (localStorage.getItem("encryptionKey")) {
@@ -112,6 +130,12 @@ export default function SettingsPage() {
             onChange={(e) => {handleLocalStorageChange(e)}}
             checked={localStorageChecked}
             />
+            <p className="font-bold mt-2">Other</p>
+            <div className="w-full h-[1px] bg-black-lighter-border my-2"></div>
+            <button
+            className="text-sm p-2 border-warning-red border-2 text-warning-red rounded-md cursor-pointer hover:bg-warning-red hover:text-text-light mt-1"
+            onClick={() => logout()}
+            >Log out</button>
         </div>
     );
 }

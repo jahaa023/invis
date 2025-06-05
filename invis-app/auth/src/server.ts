@@ -336,7 +336,7 @@ app.post('/login', async (req, res) => {
 });
 
 // Endpoint for logging a user out an clearing their session
-app.post('/logout', async (req, res) => {
+app.get('/logout', async (req, res) => {
     // Get token from cookie
     const sessionToken = req.cookies['user_session'];
 
