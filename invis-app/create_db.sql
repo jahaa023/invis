@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS chats (
     id UUID PRIMARY KEY,
-    type varchar(128) NOT NULL, -- dm, dm_temp or group
+    type varchar(128) NOT NULL, -- dm, temp_dm or group
     name varchar(32),
     cover_image varchar(255) DEFAULT 'defaultgroupchat.jpg'
 );
@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS chat_members (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
     last_accessed int DEFAULT 0,
-    joined int DEFAULT 0
+    joined int DEFAULT 0,
+    hidden BOOLEAN DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS sessions (

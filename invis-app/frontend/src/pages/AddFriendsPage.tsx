@@ -1,5 +1,7 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useAppContext } from "../AppContext";
+import generatePublicPrivatePair from "../utils/GeneratePublicPrivatePair";
+import { encryptWithKey, decryptWithKey } from "../utils/EncryptionDecryptionWithKey";
 const apiURL = import.meta.env.VITE_API_URL;
 
 export default function AddFriendsPage() {
@@ -89,11 +91,46 @@ export default function AddFriendsPage() {
         const response_json = await response.json();
 
         if (response.ok) {
-            showPopup("Friend request sent!", 3000, "success");
-            loadFriendRequests();
-            button.disabled = true;
-            button.style.cursor = "not-allowed";
-            button.title = "You have already sent a request to this user.";
+            try {
+                // Generate public private key pair for temp dm
+                const result = await generatePublicPrivatePair()
+                const privateKey = JSON.stringify(result.privateKeyBase64)
+                const publicKey = JSON.stringify(result.publicKeyBase64)
+
+                // Encrypt the private key with the encryption key
+                const encryptedPrivateKey = await encryptWithKey(privateKey)
+
+                // Store the encrypted private key and public key in the database
+                const response2 = await fetch(`${apiURL}/store_keys`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        encryptedPrivateKey : encryptedPrivateKey,
+                        publicKey : publicKey,
+                        chat_id: response_json.data.chat_id
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include"
+                })
+
+                const response2_json = await response2.json()
+
+                if (response2.ok) {
+                    // Show popup and change things on the page
+                    showPopup("Friend request sent!", 3000, "success");
+                    loadFriendRequests();
+                    button.disabled = true;
+                    button.style.cursor = "not-allowed";
+                    button.title = "You have already sent a request to this user.";
+                } else {
+                    const error = response2_json.error.message;
+                    showPopup(error, 3000, "error");
+                }
+            } catch (err) {
+                console.error(err)
+                showPopup("Something went wrong.", 3000, "error")
+            }
         } else {
             const error = response_json.error.message;
             showPopup(error, 3000, "error");

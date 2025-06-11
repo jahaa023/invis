@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser';
 import axios from 'axios';
 import { Client } from 'pg';
 import { UUID } from 'crypto';
+import crypto from "crypto";
 import path from 'path';
 import { Server } from "socket.io";
 import socketHandler from "./socket/index"
@@ -23,9 +24,10 @@ dotenv.config();
 const port = process.env.SERVER_PORT || 5000;
 const frontendURL = process.env.FRONTEND_URL
 const authURL = process.env.AUTH_URL
+const DEBUG = true
 
 const { createServer } = require('node:http')
-const fs = require('fs');
+const fs = require('node:fs');
 const app = express();
 const server = createServer(app)
 
@@ -299,6 +301,7 @@ async function startServer() {
         await client.connect()
 
         try {
+            await client.query('BEGIN');
             // If user is already in friends list
             const result = await client.query(`
                 SELECT * FROM friends_list
@@ -330,24 +333,49 @@ async function startServer() {
                 return;
             }
 
+            // Generate a random temp_dm name
+            const chat_id = crypto.randomUUID();
+
+            // Create temp dm row in chats table
+            await client.query(`
+                INSERT INTO chats (id, type)
+                VALUES ($1::uuid, $2::text)`, 
+            [chat_id, "temp_dm"])
+
+            // Insert yourself as a member of the temp dm
+            const memberRowId = crypto.randomUUID()
+            await client.query(`
+                INSERT INTO chat_members (id, user_id, chat_id, hidden)
+                VALUES ($1::uuid, $2::uuid, $3::uuid, $4::boolean);`, 
+            [memberRowId, req.userId, chat_id, true])
+
+            // Insert friend request in database
+            const rowId = crypto.randomUUID()
+            await client.query(`
+                INSERT INTO friend_requests (id, outgoing, incoming, chat_id)
+                VALUES ($1::uuid, $2::uuid, $3::uuid, $4::uuid)`,
+            [rowId, req.userId, friendRequestUid, chat_id])
+
+            // Send friend request in websocket as well
+            socket.sendFriendRequest(friendRequestUid)
+            socket.updateNavBar(friendRequestUid)
+
+            // Return response
+            res.status(201).json({
+                message: "Friend request sent!",
+                data: {
+                    chat_id: chat_id,
+                    user_id: req.userId
+                }
+            })
+
+            await client.query('COMMIT');
         } catch (err) {
+            await client.query('ROLLBACK');
             throw err;
         } finally {
             await client.end()
         }
-
-        // Insert friend request in database
-        const rowId = crypto.randomUUID()
-        await pool.query(`INSERT INTO friend_requests (id, outgoing, incoming) VALUES ($1::uuid, $2::uuid, $3::uuid)`, [rowId, req.userId, friendRequestUid])
-
-        // Send friend request in websocket as well
-        socket.sendFriendRequest(friendRequestUid)
-        socket.updateNavBar(friendRequestUid)
-
-        // Return response
-        res.status(201).json({
-            message: "Friend request sent!"
-        })
     })
 
     // Cancels a friend request
@@ -761,15 +789,19 @@ async function startServer() {
         })
     })
 
-    // Check if a chat exists and return chat id
-    app.post('/get_chat', isAuthenticated, async (req: AuthRequest, res) => {
-        // Get friends user id
-        const friendUserId = req.body.userId
-        if (!friendUserId) {
+    // Store public private key pair
+    app.post('/store_keys', isAuthenticated, async (req: AuthRequest, res) => {
+        // Get posted data
+        const encryptedPrivateKey = req.body.encryptedPrivateKey
+        const publicKey = req.body.publicKey
+        const chatId = req.body.chat_id
+
+        // If posted data is null or missing
+        if (!chatId || !encryptedPrivateKey || !publicKey) {
             res.status(400).json({
                 error: {
                     code: "BAD_REQUEST",
-                    message: "The request is missing friends user id."
+                    message: "The request is missing these parameters: encryptedPrivateKey, publicKey, chat_id"
                 }
             })
             return
@@ -782,22 +814,71 @@ async function startServer() {
         try {
             await client.query('BEGIN')
 
-            // Check if user is in friends list
+            // Check if chat exists and user is in it
             const result = await client.query(`
-                SELECT * FROM friends_list
-                WHERE user_id_1 = $1::uuid
-                AND user_id_2 = $2::uuid;`, 
-            [req.userId, friendUserId])
+                SELECT 1
+                WHERE EXISTS (
+                    SELECT user_id, chat_id
+                    FROM chat_members
+                    WHERE chat_id = $1::uuid
+                    AND user_id = $2::uuid;
+                )`, 
+            [chatId, req.userId])
 
             if (result.rowCount === 0) {
-                res.status(403).json({
+                res.status(401).json({
                     error: {
-                        code: "FORBIDDEN",
-                        message: "This user is not in your friends list."
+                        code: "UNAUTHORIZED",
+                        message: "You do not have access to this chat."
                     }
                 })
                 return
             }
+
+            // Check if keys already exists in the database
+            const result2 = await client.query(`
+                SELECT 1
+                WHERE EXISTS (
+                    SELECT user_id, chat_id
+                    FROM private_keys
+                    WHERE user_id = $1::uuid AND chat_id = $2::uuid
+                    INTERSECT
+                    SELECT user_id, chat_id
+                    FROM public_keys
+                    WHERE user_id = $1::uuid AND chat_id = $2::uuid
+                );`, 
+            [req.userId, chatId])
+
+            if (result2.rowCount === 0) {
+                res.status(409).json({
+                    error: {
+                        code: "CONFLICT",
+                        message: "Key pair already exists for this chat."
+                    }
+                })
+                return
+            }
+
+            // Insert keys into public and private keys tables
+            const rowIds = [crypto.randomUUID(), crypto.randomUUID()]
+
+            await client.query(`
+                INSERT INTO private_keys (id, user_id, chat_id, key)
+                VALUES ($1::uuid, $2::uuid, $3::uuid, $4::text);`,
+            [rowIds[0], req.userId, chatId, encryptedPrivateKey])
+
+            await client.query(`
+                INSERT INTO public_keys (id, user_id, chat_id, key)
+                VALUES ($1::uuid, $2::uuid, $3::uuid, $4::text);`,
+            [rowIds[1], req.userId, chatId, publicKey])
+
+            await client.query('COMMIT')
+
+            // Return response
+            res.status(201).json({
+                message: "Key pair successfully stored in database."
+            })
+            return
         } catch (err) {
             await client.query('ROLLBACK')
             throw err;
@@ -808,14 +889,32 @@ async function startServer() {
 
     // If non of the endpoints above matched
     app.all(/(.*)/, (req, res) => {
-        res = returnGenError(res, 404)
+        if (DEBUG) {
+            res.status(404).json({
+                "error": {
+                    "code": "NOT_FOUND",
+                    "request_path": new URL(`http://${process.env.HOST ?? 'localhost'}${req.url}`)
+                }
+            })
+        } else {
+            res = returnGenError(res, 404)
+        }
         return
     });
 
     // All errors get sent as internal server errors
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         console.error(err);
-        res = returnGenError(res, 500)
+        if (DEBUG) {
+            res.status(500).json({
+                "error": {
+                    "code": "INTERNAL_SERVER_ERROR",
+                    "error": err
+                }
+            })
+        } else {
+            res = returnGenError(res, 500)
+        }
         return
     });
 
