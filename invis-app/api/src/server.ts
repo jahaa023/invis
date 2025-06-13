@@ -430,8 +430,19 @@ async function startServer() {
             // Get friends user id
             const friendUid = result2.rows[0].incoming
 
+            // Get chat id in friend request
+            const result3 = await client.query(`
+                SELECT chat_id FROM friend_requests WHERE id = $1::uuid;`, 
+            [rowId])
+
+            const chat_id = result3.rows[0].chat_id
+
             // Delete friend request row
             await client.query(`DELETE FROM friend_requests WHERE id = $1::uuid`, [rowId])
+
+            // Delete temp chat
+            await client.query(`DELETE FROM chats WHERE id = $1::uuid;`, [chat_id])
+
             await client.query('COMMIT');
 
             // Send websocket message to remove friend request from list and remove bubble from navbar
@@ -821,8 +832,8 @@ async function startServer() {
                     SELECT user_id, chat_id
                     FROM chat_members
                     WHERE chat_id = $1::uuid
-                    AND user_id = $2::uuid;
-                )`, 
+                    AND user_id = $2::uuid
+                );`, 
             [chatId, req.userId])
 
             if (result.rowCount === 0) {
@@ -849,7 +860,7 @@ async function startServer() {
                 );`, 
             [req.userId, chatId])
 
-            if (result2.rowCount === 0) {
+            if (result2.rowCount) {
                 res.status(409).json({
                     error: {
                         code: "CONFLICT",

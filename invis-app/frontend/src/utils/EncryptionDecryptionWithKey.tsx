@@ -1,12 +1,5 @@
 // Functions for encryption and decryption with encryption key
-import { useKeyContext } from '../KeyContext';
-const { key } = useKeyContext();
-
-export async function encryptWithKey(content: string): Promise<string>  {
-    if (!key) {
-        throw Error("Key needed for this operation.")
-    }
-
+export async function encryptWithKey(content: string, key: CryptoKey): Promise<string>  {
     const encoder = new TextEncoder();
     const data = encoder.encode(content);
 
@@ -26,11 +19,7 @@ export async function encryptWithKey(content: string): Promise<string>  {
     return btoa(String.fromCharCode(...combined)); // base64 string
 }
 
-export async function decryptWithKey(content: string): Promise<string> {
-    if (!key) {
-        throw Error("Key needed for this operation.")
-    }
-
+export async function decryptWithKey(content: string, key: CryptoKey): Promise<string> {
     const combined = Uint8Array.from(atob(content), c => c.charCodeAt(0));
 
     const iv = combined.slice(0, 12); // First 12 bytes = IV

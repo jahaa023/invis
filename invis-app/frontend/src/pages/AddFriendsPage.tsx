@@ -1,7 +1,8 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useAppContext } from "../AppContext";
 import generatePublicPrivatePair from "../utils/GeneratePublicPrivatePair";
-import { encryptWithKey, decryptWithKey } from "../utils/EncryptionDecryptionWithKey";
+import { encryptWithKey } from "../utils/EncryptionDecryptionWithKey";
+import { useKeyContext } from "../KeyContext";
 const apiURL = import.meta.env.VITE_API_URL;
 
 export default function AddFriendsPage() {
@@ -21,6 +22,7 @@ export default function AddFriendsPage() {
     const [searchError, setSearchError] = useState(false);
     const [searchNotFound, setSearchNotFound] = useState("");
     const [searchResult, setSearchResult] = useState([]);
+    const { key } = useKeyContext()
 
     const [incomingRequests, setIncomingRequests] = useState<friendRequest[]>(
         []
@@ -98,7 +100,11 @@ export default function AddFriendsPage() {
                 const publicKey = JSON.stringify(result.publicKeyBase64)
 
                 // Encrypt the private key with the encryption key
-                const encryptedPrivateKey = await encryptWithKey(privateKey)
+                if (!key) {
+                    return
+                }
+
+                const encryptedPrivateKey = await encryptWithKey(privateKey, key)
 
                 // Store the encrypted private key and public key in the database
                 const response2 = await fetch(`${apiURL}/store_keys`, {
